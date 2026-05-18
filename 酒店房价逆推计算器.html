@@ -1,0 +1,3594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒店房价逆推计算器</title>
+    <style>
+        @media (max-width: 768px) {
+            .mobile-bottom-tools {
+                display: none !important;
+            }
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active[data-page="ctrip"] {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab.active[data-page="meituan"] {
+            color: #f39c12;
+            border-bottom: 3px solid #f39c12;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: flex;
+            gap: 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .room-price {
+            width: 120px !important;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        #ctrip .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+
+        #meituan .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fef9e7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #d5dbdb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f2f2f2;
+            font-weight: 600;
+            color: #34495e;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .price-diff-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fef9e7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+
+        /* 开关样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #f39c12;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #f39c12;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .base-price-display {
+            position: relative;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .base-price-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+        }
+
+        .base-price-display::before {
+            content: "底";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .base-price-display:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4caf50, #81c784, #4caf50);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .sell-price-display {
+            position: relative;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #1565c0;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .sell-price-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
+        }
+
+        .sell-price-display::before {
+            content: "卖";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sell-price-display:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+            background-size: 200% 100%;
+            animation: shimmer-blue 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer-blue {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .base-price-display-meituan {
+            position: relative;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ff9800;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #ef6c00;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .base-price-display-meituan:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.35);
+        }
+
+        .base-price-display-meituan::before {
+            content: "底";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ff9800 0%, #ef6c00 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .base-price-display-meituan:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff9800, #ffb74d, #ff9800);
+            background-size: 200% 100%;
+            animation: shimmer-orange 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer-orange {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .sell-price-display-meituan {
+            position: relative;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #f57f17;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .sell-price-display-meituan:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35);
+        }
+
+        .sell-price-display-meituan::before {
+            content: "卖";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ffc107 0%, #f57f17 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sell-price-display-meituan:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffc107, #ffd54f, #ffc107);
+            background-size: 200% 100%;
+            animation: shimmer-yellow 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer-yellow {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .platform-subsidy-display,
+        .platform-subsidy-display-meituan,
+        .douyin-price-display {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .coupon-rule-row {
+            padding: 8px;
+        }
+
+        .coupon-rule-row input {
+            padding: 8px !important;
+        }
+
+        /* =========================
+       手机端自适应核心优化
+       ========================= */
+        @media (max-width: 768px) {
+            body {
+                background: #f5f7fa;
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                min-height: 100vh;
+                border-radius: 0;
+                padding: 12px;
+                box-shadow: none;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 18px;
+                line-height: 1.4;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 14px;
+            }
+
+            .section {
+                padding: 12px;
+                margin-bottom: 18px;
+                border-radius: 10px;
+            }
+
+            .tab-container {
+                gap: 8px;
+                flex-wrap: wrap;
+                border-bottom: none;
+                margin-bottom: 18px;
+            }
+
+            .tab {
+                flex: 1 1 calc(50% - 4px);
+                font-size: 0.95rem;
+                padding: 10px 8px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                background: #fff;
+            }
+
+            .tab.active[data-page="ctrip"] {
+                border-bottom: 1px solid #3498db;
+            }
+
+            .tab.active[data-page="meituan"] {
+                border-bottom: 1px solid #f39c12;
+            }
+
+            .page.active {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            /* 覆盖页面里写死的 70% / 30% */
+            .page>div {
+                width: 100% !important;
+            }
+
+            .page>div:first-child,
+            .page>div:last-child {
+                width: 100% !important;
+            }
+
+            /* 页头区域改为上下排列 */
+            .section>div[style*="justify-content: space-between"][style*="align-items: center"] {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px;
+            }
+
+            .section>div[style*="justify-content: space-between"][style*="align-items: center"] .btn,
+            .section>div[style*="justify-content: space-between"][style*="align-items: center"] button {
+                width: 100%;
+            }
+
+            /* 批量调整区手机端堆叠 */
+            .price-diff-section {
+                padding: 12px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .price-diff-section h3 {
+                font-size: 1.05rem;
+                margin-bottom: 12px;
+            }
+
+            .price-diff-section>div[style*="display: flex"] {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+
+            .price-diff-section .form-group {
+                margin-bottom: 0;
+            }
+
+            .price-diff-section .btn,
+            .price-diff-section button {
+                width: 100%;
+            }
+
+            /* 输入控件 */
+            input[type="number"] {
+                font-size: 16px;
+                padding: 10px 12px;
+            }
+
+            .room-price,
+            .room-price-meituan {
+                width: 100% !important;
+                min-width: 110px;
+            }
+
+            /* 表格优化 */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 8px;
+            }
+
+            table {
+                min-width: 760px;
+                margin-top: 12px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            /* 操作按钮允许换行 */
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                min-width: 150px;
+            }
+
+            .btn {
+                padding: 10px 14px;
+                font-size: 0.95rem;
+            }
+
+            .btn-sm {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            /* 一键计算按钮右对齐区域改为满宽 */
+            div[style*="justify-content: flex-end"] {
+                justify-content: stretch !important;
+            }
+
+            div[style*="justify-content: flex-end"] .btn,
+            div[style*="justify-content: flex-end"] button {
+                width: 100%;
+            }
+
+            /* 结果区 */
+            .result {
+                padding: 14px !important;
+            }
+
+            .result-item {
+                gap: 12px;
+                align-items: flex-start;
+                font-size: 14px;
+            }
+
+            .result-label,
+            .result-value {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            /* 价格展示块缩小一点 */
+            .base-price-display,
+            .sell-price-display,
+            .base-price-display-meituan,
+            .sell-price-display-meituan {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .base-price-display::before,
+            .sell-price-display::before,
+            .base-price-display-meituan::before,
+            .sell-price-display-meituan::before {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                top: -6px;
+                left: -6px;
+            }
+
+            .coupon-rule-row {
+                padding: 6px;
+            }
+
+            .coupon-rule-row input {
+                padding: 6px !important;
+            }
+        }
+
+        /* 超小屏手机进一步优化 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .tab {
+                font-size: 0.9rem;
+                padding: 9px 6px;
+            }
+
+            .section {
+                padding: 10px;
+            }
+
+            table {
+                min-width: 700px;
+            }
+
+            th,
+            td {
+                font-size: 12px;
+                padding: 8px 6px;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+                padding: 9px 12px;
+            }
+
+            .btn-sm {
+                font-size: 11px;
+                padding: 5px 7px;
+            }
+
+            .result-item {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+
+        /* =========================
+   仅手机端：调整模块显示顺序
+   PC端完全不动
+   ========================= */
+        @media (max-width: 768px) {
+
+            /* 页面两列改为上下，但只限手机 */
+            .page.active {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 14px;
+            }
+
+            /* 覆盖原本 70% / 30% */
+            .mobile-calculator-column,
+            .mobile-room-column {
+                width: 100% !important;
+            }
+
+            /* 逆推计算器在最上面 */
+            .mobile-calculator-column {
+                order: 1;
+            }
+
+            /* 房型管理区在下面 */
+            .mobile-room-column {
+                order: 2;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* 房型管理头部：标题保留，按钮下沉到底部 */
+            .room-manage-header {
+                order: 1;
+                margin-bottom: 12px !important;
+            }
+
+            /* 让标题和按钮拆开，按钮隐藏到原位 */
+            .room-manage-header .btn,
+            .room-manage-header button {
+                display: none !important;
+            }
+
+            /* 房型列表排前面 */
+            .mobile-room-table {
+                order: 2;
+            }
+
+            /* 一键计算跟在表格后 */
+            .mobile-calc-all-bar {
+                order: 3;
+            }
+
+            /* 概览列表继续在后面 */
+            .mobile-overview-section {
+                order: 4;
+            }
+
+            /* 批量价格调整放到底部 */
+            .mobile-bottom-tools {
+                order: 5;
+                margin-top: 16px !important;
+            }
+
+            /* 在批量价格调整后面补一个“添加房型”按钮 */
+            .mobile-bottom-tools::after {
+                content: "添加房型";
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 12px;
+                width: 100%;
+                padding: 12px 16px;
+                border-radius: 6px;
+                font-size: 1rem;
+                font-weight: 600;
+                color: #fff;
+                background: #95a5a6;
+                cursor: pointer;
+            }
+
+            /* 携程页按钮颜色 */
+            #ctrip .mobile-bottom-tools::after {
+                background: #95a5a6;
+            }
+
+            /* 美团页按钮颜色 */
+            #meituan .mobile-bottom-tools::after {
+                background: #95a5a6;
+            }
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active[data-page="ctrip"] {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab.active[data-page="meituan"] {
+            color: #f39c12;
+            border-bottom: 3px solid #f39c12;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: flex;
+            gap: 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .room-price {
+            width: 120px !important;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        #ctrip .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+
+        #meituan .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fef9e7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #d5dbdb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f2f2f2;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .price-diff-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fef9e7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+
+        /* 开关样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #f39c12;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #f39c12;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        /* 圆角滑块 */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .tab {
+                font-size: 1rem;
+                padding: 12px;
+            }
+        }
+
+        .base-price-display {
+            position: relative;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .base-price-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+        }
+
+        .base-price-display::before {
+            content: "底";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .base-price-display:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4caf50, #81c784, #4caf50);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .base-price-display {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .base-price-display::before {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                top: -6px;
+                left: -6px;
+            }
+        }
+
+        .sell-price-display {
+            position: relative;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #1565c0;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .sell-price-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
+        }
+
+        .sell-price-display::before {
+            content: "卖";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sell-price-display:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+            background-size: 200% 100%;
+            animation: shimmer-blue 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer-blue {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sell-price-display {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .sell-price-display::before {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                top: -6px;
+                left: -6px;
+            }
+        }
+
+        .base-price-display-meituan {
+            position: relative;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .base-price-display-meituan:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+        }
+
+        .base-price-display-meituan::before {
+            content: "底";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .base-price-display-meituan:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4caf50, #81c784, #4caf50);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .sell-price-display-meituan {
+            position: relative;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #1565c0;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .sell-price-display-meituan:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
+        }
+
+        .sell-price-display-meituan::before {
+            content: "卖";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sell-price-display-meituan:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+            background-size: 200% 100%;
+            animation: shimmer-blue 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        /* 抖音价格样式 - 黑灰色系 */
+        .douyin-price-display {
+            position: relative;
+            background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+            border: 2px solid #616161;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            color: #212121;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .douyin-price-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .douyin-price-display::before {
+            content: "抖";
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #616161 0%, #424242 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .douyin-price-display:not(:empty)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #616161, #9e9e9e, #616161);
+            background-size: 200% 100%;
+            animation: shimmer-gray 2s infinite linear;
+            border-radius: 0 0 6px 6px;
+        }
+
+        @keyframes shimmer-gray {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .base-price-display-meituan,
+            .sell-price-display-meituan {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .base-price-display-meituan::before,
+            .sell-price-display-meituan::before {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                top: -6px;
+                left: -6px;
+            }
+        }
+
+        /* 神券满减规则样式 */
+        .coupon-rule-row {
+            background: #fafafa;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-rule-row:hover {
+            background: #f5f5f5;
+            border-color: #f39c12;
+        }
+
+        .coupon-rule-row input:focus {
+            border-color: #f39c12;
+            box-shadow: 0 0 0 2px rgba(243, 156, 18, 0.1);
+        }
+
+        .coupon-rule-row .btn-danger {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            .coupon-rule-row {
+                padding: 6px;
+            }
+
+            .coupon-rule-row input {
+                padding: 6px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <h1>酒店房价逆推计算器</h1>
+
+        <div class="tab-container">
+            <div class="tab active" data-page="ctrip">携程计算</div>
+            <div class="tab" data-page="meituan">美团计算</div>
+        </div>
+
+        <div class="page active" id="ctrip">
+            <!-- 左边：房型价格管理（70%） -->
+            <div class="mobile-room-column" style="width: 70%;">
+                <div class="section">
+                    <div class="room-manage-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+
+                        <h2>房型价格管理</h2>
+                        <button class="btn btn-secondary" onclick="addRoom()">添加房型</button>
+                    </div>
+
+                    <!-- 批量价格调整 -->
+                    <div class="price-diff-section mobile-bottom-tools"
+                        style="margin-bottom: 20px; padding: 20px; background-color: #e3f2fd; border-left: 4px solid #3498db; border-radius: 6px;">
+                        <h3 style="color: #1976d2; margin-top: 0;">批量价格调整</h3>
+                        <div style="display: flex; gap: 20px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label style="color: #1976d2;">基准房型价格</label>
+                                <input type="number" id="base-price" placeholder="请输入基准房型价格"
+                                    style="border: 1px solid #bbdefb;">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label style="color: #1976d2;">房型支付价差价</label>
+                                <input type="number" id="room-price-diff" placeholder="请输入房型支付价差价"
+                                    style="border: 1px solid #bbdefb;">
+                            </div>
+                        </div>
+                        <button class="btn"
+                            style="background-color: #3498db; color: white; margin-top: 10px; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                            onclick="applyPriceDiff()">应用差价</button>
+                    </div>
+
+                    <!-- 房型列表 -->
+                    <div class="table-container mobile-room-table">
+                        <table id="room-type-table">
+                            <thead>
+                                <tr>
+                                    <th>房型</th>
+                                    <th>客付价</th>
+                                    <th>卖价</th>
+                                    <th>底价</th>
+                                    <th>平台补贴</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>投影房</td>
+                                    <td><input type="number" class="room-price" data-index="0" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(0)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(0)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(0)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(0)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>大床房</td>
+                                    <td><input type="number" class="room-price" data-index="1" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(1)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(1)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(1)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(1)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>双床房</td>
+                                    <td><input type="number" class="room-price" data-index="2" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(2)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(2)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(2)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(2)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>亲子房</td>
+                                    <td><input type="number" class="room-price" data-index="3" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(3)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(3)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(3)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(3)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>商务房</td>
+                                    <td><input type="number" class="room-price" data-index="4" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(4)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(4)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(4)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(4)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>浴缸房</td>
+                                    <td><input type="number" class="room-price" data-index="5" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(5)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(5)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(5)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(5)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>行政套房</td>
+                                    <td><input type="number" class="room-price" data-index="6" placeholder="请输入客付价">
+                                    </td>
+                                    <td class="sell-price-display"></td>
+                                    <td class="base-price-display"></td>
+                                    <td class="platform-subsidy-display"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUp(6)">↑</button>
+                                            <button class="btn btn-sm btn-warning" onclick="moveDown(6)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPrice(6)">计算</button>
+                                            <button class="btn btn-sm btn-danger" onclick="removeRoom(6)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 一键计算按钮容器 -->
+                    <div class="mobile-calc-all-bar"
+                        style="width: 100%; margin-top: 20px; display: flex; justify-content: flex-end;">
+                        <button class="btn btn-success" onclick="calculateAllRoomPrices()">一键计算</button>
+                    </div>
+
+                    <!-- 房型概览列表（按指定顺序） -->
+                    <div class="section mobile-overview-section" style="margin-top: 30px;">
+
+                        <h2>订单来了顺序</h2>
+                        <div class="table-container">
+                            <table id="room-overview-table-ctrip">
+                                <thead>
+                                    <tr>
+                                        <th>房型</th>
+                                        <th>客付价</th>
+                                        <th>抖音价格</th>
+                                        <th>卖价</th>
+                                        <th>底价</th>
+                                        <th>平台补贴</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-room="大床房">
+                                        <td>大床房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="投影房">
+                                        <td>投影房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="浴缸房">
+                                        <td>浴缸房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="商务房">
+                                        <td>商务房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="亲子房">
+                                        <td>亲子房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="双床房">
+                                        <td>双床房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                    <tr data-room="行政套房">
+                                        <td>行政套房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display">--</td>
+                                        <td class="base-price-display">--</td>
+                                        <td class="platform-subsidy-display">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右边：逆推计算器（30%） -->
+            <div class="mobile-calculator-column" style="width: 30%;">
+                <div class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>逆推计算器</h2>
+                        <button type="info" size="small" onclick="showDiscountModal('ctrip')">修改折扣</button>
+                    </div>
+                    <div class="form-group">
+                        <label>支付价（客付价）</label>
+                        <input type="number" id="payment-price" placeholder="请输入支付价">
+                    </div>
+                    <div class="form-group">
+                        <label>卖价</label>
+                        <input type="number" id="sell-price" placeholder="请输入卖价">
+                    </div>
+                    <div class="form-group">
+                        <label>平台补贴抵扣金额</label>
+                        <input type="number" id="platform-subsidy-amount" placeholder="请输入平台补贴抵扣金额">
+                    </div>
+                    <div class="form-group">
+                        <label>佣金比例 (%)</label>
+                        <input type="number" id="commission-rate" value="15" placeholder="请输入佣金比例">
+                    </div>
+                    <div class="form-group">
+                        <label>场景促销折扣 (%)</label>
+                        <input type="number" id="scene-promo-rate" value="5" placeholder="请输入场景促销折扣" min="0" max="100">
+                    </div>
+                    <button class="btn"
+                        style="background-color: #3498db; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                        onclick="calculateReverse()">计算</button>
+                    <div class="result" id="reverse-result">
+                        <!-- 计算结果将显示在这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="meituan">
+            <!-- 左边：房型价格管理（70%） -->
+            <div class="mobile-room-column" style="width: 70%;">
+                <div class="section">
+                    <div class="room-manage-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>房型价格管理</h2>
+                        <button class="btn btn-secondary" onclick="addRoomMeituan()">添加房型</button>
+                    </div>
+
+                    <!-- 批量价格调整 -->
+                    <div class="price-diff-section mobile-bottom-tools" style="margin-bottom: 20px;">
+
+                        <h3>批量价格调整</h3>
+                        <div style="display: flex; gap: 20px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>基准房型价格</label>
+                                <input type="number" id="base-price-meituan" placeholder="请输入基准房型价格">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>房型支付价差价</label>
+                                <input type="number" id="room-price-diff-meituan" placeholder="请输入房型支付价差价">
+                            </div>
+                        </div>
+                        <button class="btn"
+                            style="background-color: #f39c12; color: white; margin-top: 10px; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                            onclick="applyPriceDiffMeituan()">应用差价</button>
+                    </div>
+
+                    <!-- 房型列表 -->
+                    <div class="table-container mobile-room-table">
+
+                        <table id="room-type-table-meituan">
+                            <thead>
+                                <tr>
+                                    <th>房型</th>
+                                    <th style="width: 167.5px;">客付价</th>
+                                    <th>卖价</th>
+                                    <th>底价</th>
+                                    <th>平台补贴</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>投影房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="0"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(0)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(0)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(0)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(0)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>大床房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="1"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(1)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(1)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(1)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(1)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>双床房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="2"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(2)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(2)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(2)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(2)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>亲子房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="3"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(3)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(3)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(3)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(3)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>商务房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="4"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(4)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(4)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(4)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(4)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>浴缸房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="5"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(5)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(5)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(5)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(5)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>行政套房</td>
+                                    <td><input type="number" class="room-price-meituan" data-index="6"
+                                            placeholder="请输入客付价"></td>
+                                    <td class="sell-price-display-meituan"></td>
+                                    <td class="base-price-display-meituan"></td>
+                                    <td class="platform-subsidy-display-meituan"></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(6)">↑</button>
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="moveDownMeituan(6)">↓</button>
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="calculateRoomPriceMeituan(6)">计算</button>
+                                            <button class="btn btn-sm btn-danger"
+                                                onclick="removeRoomMeituan(6)">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 一键计算按钮容器 -->
+                    <div class="mobile-calc-all-bar"
+                        style="width: 100%; margin-top: 20px; display: flex; justify-content: flex-end;">
+
+                        <button class="btn btn-success" onclick="calculateAllRoomPricesMeituan()">一键计算</button>
+                    </div>
+
+                    <!-- 房型概览列表（按指定顺序） -->
+                    <div class="section mobile-overview-section" style="margin-top: 30px;">
+
+                        <h2>订单来了顺序</h2>
+                        <div class="table-container">
+                            <table id="room-overview-table-meituan">
+                                <thead>
+                                    <tr>
+                                        <th>房型</th>
+                                        <th>客付价</th>
+                                        <th>抖音价格</th>
+                                        <th>卖价</th>
+                                        <th>底价</th>
+                                        <th>平台补贴</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-room="大床房">
+                                        <td>大床房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="投影房">
+                                        <td>投影房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="浴缸房">
+                                        <td>浴缸房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="商务房">
+                                        <td>商务房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="亲子房">
+                                        <td>亲子房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="双床房">
+                                        <td>双床房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                    <tr data-room="行政套房">
+                                        <td>行政套房</td>
+                                        <td class="overview-payment">--</td>
+                                        <td class="douyin-price-display">--</td>
+                                        <td class="sell-price-display-meituan">--</td>
+                                        <td class="base-price-display-meituan">--</td>
+                                        <td class="platform-subsidy-display-meituan">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右边：逆推计算器（30%） -->
+            <div class="mobile-calculator-column" style="width: 30%;">
+                <div class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>逆推计算器</h2>
+                        <button type="info" size="small" onclick="showDiscountModal('meituan')">修改折扣</button>
+                    </div>
+                    <div class="form-group">
+                        <label>支付价（客付价）</label>
+                        <input type="number" id="payment-price-meituan" placeholder="请输入支付价">
+                    </div>
+                    <div class="form-group">
+                        <label>卖价</label>
+                        <input type="number" id="sell-price-meituan" placeholder="请输入卖价">
+                    </div>
+                    <div class="form-group">
+                        <label>平台补贴率 (%)</label>
+                        <input type="number" id="platform-subsidy-amount-meituan" placeholder="请输入平台补贴率" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>早定优惠</span>
+                            <label class="switch">
+                                <input type="checkbox" id="early-book-switch-meituan" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </label>
+                    </div>
+
+                    <!-- 神券规则输入框（动态添加） -->
+                    <div class="form-group">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label>神券规则（满减）:</label>
+                            <button class="btn btn-sm"
+                                style="background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;"
+                                onclick="addCouponRuleMeituan()">+ 添加神券</button>
+                        </div>
+                        <div id="god-coupon-rules-meituan" style="margin-top: 5px;">
+                            <!-- 第一行 -->
+                            <div class="coupon-rule-row" data-index="0"
+                                style="display: flex; margin-bottom: 5px; align-items: center;">
+                                <input type="number" class="coupon-threshold" placeholder="满多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="number" class="coupon-discount" placeholder="减多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn btn-sm btn-danger" onclick="removeCouponRuleMeituan(0)"
+                                    style="padding: 6px 10px; font-size: 0.8rem;" title="删除">×</button>
+                            </div>
+                            <!-- 第二行 -->
+                            <div class="coupon-rule-row" data-index="1"
+                                style="display: flex; margin-bottom: 5px; align-items: center;">
+                                <input type="number" class="coupon-threshold" placeholder="满多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="number" class="coupon-discount" placeholder="减多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn btn-sm btn-danger" onclick="removeCouponRuleMeituan(1)"
+                                    style="padding: 6px 10px; font-size: 0.8rem;" title="删除">×</button>
+                            </div>
+                            <!-- 第三行 -->
+                            <div class="coupon-rule-row" data-index="2"
+                                style="display: flex; margin-bottom: 5px; align-items: center;">
+                                <input type="number" class="coupon-threshold" placeholder="满多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="number" class="coupon-discount" placeholder="减多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn btn-sm btn-danger" onclick="removeCouponRuleMeituan(2)"
+                                    style="padding: 6px 10px; font-size: 0.8rem;" title="删除">×</button>
+                            </div>
+                            <!-- 第四行 -->
+                            <div class="coupon-rule-row" data-index="3"
+                                style="display: flex; margin-bottom: 5px; align-items: center;">
+                                <input type="number" class="coupon-threshold" placeholder="满多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="number" class="coupon-discount" placeholder="减多少"
+                                    style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn btn-sm btn-danger" onclick="removeCouponRuleMeituan(3)"
+                                    style="padding: 6px 10px; font-size: 0.8rem;" title="删除">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>佣金比例 (%)</label>
+                        <input type="number" id="commission-rate-meituan" value="12" placeholder="请输入佣金比例">
+                    </div>
+                    <button class="btn"
+                        style="background-color: #f39c12; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                        onclick="calculateReverseMeituan()">计算</button>
+                    <div class="result" id="reverse-result-meituan">
+                        <!-- 计算结果将显示在这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 折扣修改弹窗 -->
+        <div id="discount-modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+            <div
+                style="background-color: white; margin: 5% auto; padding: 20px; border-radius: 10px; width: 500px; max-width: 90%;">
+                <h3 id="modal-title">修改折扣</h3>
+                <div id="modal-content">
+                    <!-- 内容动态填充 -->
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button onclick="closeDiscountModal()"
+                        style="padding: 8px 16px; margin-right: 10px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button onclick="saveDiscounts()"
+                        style="padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载状态提示 -->
+        <div id="loading-indicator"
+            style="display: none; position: fixed; z-index: 1001; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div
+                    style="width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;">
+                </div>
+                <span>计算中，请稍候...</span>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+            </style>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        // 携程
+        let COMMISSION_RATE = 0.15;
+        let MEMBER_DISCOUNT_RATE = 0.15; // 会员折扣15%
+        let DAILY_SPECIAL_RATE = 0.1;    // 天天特价10%
+        let SCENE_PROMO_RATE = 0.05;     // 场景促销1%
+        let HOTEL_RED_PACKET_RATE = 0.1; // 酒店红包10%
+
+        // 美团
+        let COMMISSION_RATE_MEITUAN = 0.12; // 美团佣金12%
+        let MEMBER_DISCOUNT_RATE_MEITUAN = 0.15; // 会员折扣15%
+        let EARLY_BOOK_RATE_MEITUAN = 0.02;       // 早定优惠2%
+
+        // 页面切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const page = this.getAttribute('data-page');
+
+                // 更新标签状态
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // 更新页面显示
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(page).classList.add('active');
+            });
+        });
+
+        // 计算平台补贴百分比（携程）
+        function calculatePlatformSubsidyRate(sellPrice, subsidyAmount) {
+            if (!sellPrice || !subsidyAmount) return 0;
+            return (subsidyAmount / sellPrice) - 0.1; // 减去天天特价的10%
+        }
+
+        // 逆推计算（携程）
+        function calculateReverse() {
+            const paymentPrice = parseFloat(document.getElementById('payment-price').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('sell-price').value) || 0;
+            const subsidyAmount = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
+
+            if (!paymentPrice && !sellPrice) {
+                alert('请至少输入支付价或卖价');
+                return;
+            }
+
+            // 计算平台补贴百分比
+            const platformSubsidyRate = calculatePlatformSubsidyRate(sellPrice, subsidyAmount);
+
+            // 获取场景促销折扣并验证
+            const scenePromoRateInput = parseFloat(document.getElementById('scene-promo-rate').value) || 0;
+            if (scenePromoRateInput < 0 || scenePromoRateInput > 100) {
+                alert('场景促销折扣必须在0-100之间');
+                return;
+            }
+            const scenePromoRate = scenePromoRateInput / 100;
+
+            // 逆推卖价和底价
+            let calculatedSellPrice, calculatedBasePrice;
+            if (paymentPrice) {
+                // 计算总折扣率（携程是累加关系）
+                const totalDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + scenePromoRate + HOTEL_RED_PACKET_RATE + platformSubsidyRate;
+                calculatedSellPrice = Math.ceil(paymentPrice / (1 - totalDiscountRate)); // 向上取整，避免误差
+            } else {
+                calculatedSellPrice = Math.ceil(sellPrice); // 向上取整，避免误差
+            }
+            const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
+            calculatedBasePrice = Math.ceil(calculatedSellPrice * (1 - commissionRate)) + 1; // 向上取整，避免误差，增加1元修正误差
+
+            // 计算各个折扣金额
+            const memberDiscountAmount = Math.round(calculatedSellPrice * MEMBER_DISCOUNT_RATE);
+            const dailySpecialAmount = Math.round(calculatedSellPrice * DAILY_SPECIAL_RATE);
+            const scenePromoAmount = Math.round(calculatedSellPrice * scenePromoRate);
+            const redPacketAmount = Math.ceil(calculatedSellPrice * HOTEL_RED_PACKET_RATE); // 红包金额向上取整
+            const platformSubsidyAmount = Math.round(calculatedSellPrice * platformSubsidyRate);
+
+            // 计算客付价（验证）
+            const calculatedPaymentPrice = Math.round(calculatedSellPrice - memberDiscountAmount - dailySpecialAmount - scenePromoAmount - redPacketAmount - platformSubsidyAmount);
+
+            // 计算客付价
+            const customerPaymentPrice = Math.round(paymentPrice || calculatedPaymentPrice);
+
+            // 显示结果
+            const resultDiv = document.getElementById('reverse-result');
+            resultDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">客付价（支付价）：</span>
+                    <span class="result-value">¥${customerPaymentPrice}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">卖价：</span>
+                    <span class="result-value">¥${Math.round(calculatedSellPrice)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">底价：</span>
+                    <span class="result-value">¥${Math.round(calculatedBasePrice)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">会员折扣（85折）：</span>
+                    <span class="result-value">¥${memberDiscountAmount}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">天天特价（9折）：</span>
+                    <span class="result-value">¥${dailySpecialAmount}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">场景促销（${100 - Math.round(scenePromoRateInput)}折）：</span>
+                    <span class="result-value">¥${scenePromoAmount}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">酒店红包（9折）：</span>
+                    <span class="result-value">¥${redPacketAmount}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">平台补贴：</span>
+                    <span class="result-value">¥${platformSubsidyAmount} (${(platformSubsidyRate * 100).toFixed(2)}%)</span>
+                </div>
+            `;
+        }
+
+        // 计算单个房型价格（携程）
+        function calculateRoomPrice(index) {
+            const paymentPrice = parseFloat(document.querySelectorAll('.room-price')[index].value) || 0;
+            if (!paymentPrice) {
+                alert('请输入支付价');
+                return;
+            }
+
+            // 从逆推计算器获取平台补贴率
+            const sellPriceInput = parseFloat(document.getElementById('sell-price').value) || 0;
+            const subsidyAmountInput = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
+            const platformSubsidyRate = calculatePlatformSubsidyRate(sellPriceInput, subsidyAmountInput);
+
+            // 获取场景促销折扣并验证
+            const scenePromoRateInput = parseFloat(document.getElementById('scene-promo-rate').value) || 0;
+            if (scenePromoRateInput < 0 || scenePromoRateInput > 100) {
+                alert('场景促销折扣必须在0-100之间');
+                return;
+            }
+            const scenePromoRate = scenePromoRateInput / 100;
+
+            // 计算总折扣率（携程是累加关系）
+            const totalDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + scenePromoRate + HOTEL_RED_PACKET_RATE + platformSubsidyRate;
+
+            // 计算卖价和底价
+            const sellPrice = paymentPrice / (1 - totalDiscountRate);
+            const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
+            const basePrice = sellPrice * (1 - commissionRate);
+            const platformSubsidy = sellPrice * platformSubsidyRate;
+
+            // 四舍五入取整数，并在底价基础上增加1元修正误差
+            const roundedSellPrice = Math.round(sellPrice) + 2; // 增加2元修正误差，美团酒店临时用
+            const roundedBasePrice = Math.round(basePrice) + 1; // 增加1元修正误差
+            const roundedPlatformSubsidy = Math.round(platformSubsidy);
+
+            // 更新显示
+            const row = document.querySelectorAll('#room-type-table tbody tr')[index];
+            row.querySelector('.sell-price-display').textContent = `¥${roundedSellPrice}`;
+            row.querySelector('.base-price-display').textContent = `¥${roundedBasePrice}`;
+            row.querySelector('.platform-subsidy-display').textContent = `¥${roundedPlatformSubsidy}`;
+
+            // 更新房型概览表格
+            updateCtripOverview();
+        }
+
+        // 应用差价设置（携程）
+        function applyPriceDiff() {
+            const basePrice = parseFloat(document.getElementById('base-price').value) || 0;
+            const roomPriceDiff = parseFloat(document.getElementById('room-price-diff').value) || 0;
+
+            if (!basePrice) {
+                alert('请输入基准房型价格');
+                return;
+            }
+
+            // 更新房型价格，基于基准价格和统一差价
+            const roomPrices = [];
+            const roomCount = document.querySelectorAll('.room-price').length;
+
+            for (let i = 0; i < roomCount; i++) {
+                roomPrices.push(basePrice + (i * roomPriceDiff));
+            }
+
+            // 填充输入框并计算
+            roomPrices.forEach((price, index) => {
+                const input = document.querySelectorAll('.room-price')[index];
+                if (input) {
+                    input.value = price;
+                    calculateRoomPrice(index);
+                }
+            });
+        }
+
+        // 添加房型（携程）
+        function addRoom() {
+            const tbody = document.querySelector('#room-type-table tbody');
+            const rowCount = tbody.children.length;
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+                <td>新房型${rowCount + 1}</td>
+                <td><input type="number" class="room-price" data-index="${rowCount}" placeholder="请输入客付价"></td>
+                <td class="sell-price-display"></td>
+                <td class="base-price-display"></td>
+                <td class="platform-subsidy-display"></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-warning" onclick="moveUp(${rowCount})">↑</button>
+                        <button class="btn btn-sm btn-warning" onclick="moveDown(${rowCount})">↓</button>
+                        <button class="btn btn-sm btn-success" onclick="calculateRoomPrice(${rowCount})">计算</button>
+                        <button class="btn btn-sm btn-danger" onclick="removeRoom(${rowCount})">删除</button>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(newRow);
+
+            // 更新索引
+            updateRowIndices();
+        }
+
+        // 删除房型（携程）
+        function removeRoom(index) {
+            const tbody = document.querySelector('#room-type-table tbody');
+            if (tbody.children.length > 1) {
+                tbody.removeChild(tbody.children[index]);
+                updateRowIndices();
+            } else {
+                alert('至少保留一个房型');
+            }
+        }
+
+        // 上移房型（携程）
+        function moveUp(index) {
+            if (index > 0) {
+                const tbody = document.querySelector('#room-type-table tbody');
+                const row = tbody.children[index];
+                tbody.insertBefore(row, tbody.children[index - 1]);
+                updateRowIndices();
+            }
+        }
+
+        // 下移房型（携程）
+        function moveDown(index) {
+            const tbody = document.querySelector('#room-type-table tbody');
+            if (index < tbody.children.length - 1) {
+                const row = tbody.children[index];
+                tbody.insertBefore(row, tbody.children[index + 2]);
+                updateRowIndices();
+            }
+        }
+
+        // 更新行索引（携程）
+        function updateRowIndices() {
+            const rows = document.querySelectorAll('#room-type-table tbody tr');
+            rows.forEach((row, index) => {
+                // 更新输入框索引
+                const input = row.querySelector('.room-price');
+                if (input) {
+                    input.setAttribute('data-index', index);
+                }
+
+                // 更新按钮点击事件
+                const buttons = row.querySelectorAll('button');
+                if (buttons.length >= 4) {
+                    buttons[0].setAttribute('onclick', `moveUp(${index})`);
+                    buttons[1].setAttribute('onclick', `moveDown(${index})`);
+                    buttons[2].setAttribute('onclick', `calculateRoomPrice(${index})`);
+                    buttons[3].setAttribute('onclick', `removeRoom(${index})`);
+                }
+            });
+        }
+
+        // ====================== 美团计算相关函数（修正版） ======================
+
+        // 计算平台补贴金额（根据补贴率）
+        function calculatePlatformSubsidyAmountMeituan(sellPrice, subsidyRate) {
+            if (!sellPrice || !subsidyRate) return 0;
+            return Math.floor(sellPrice * subsidyRate * 100) / 100;
+        }
+
+        // 根据卖价获取适用的神券金额
+        function getApplicableCouponAmount(sellPrice, couponRules) {
+            if (!couponRules || couponRules.length === 0) return 0;
+
+            // 按阈值从大到小排序，找到第一个满足条件的规则
+            const sortedRules = couponRules.sort((a, b) => b.threshold - a.threshold);
+
+            for (let rule of sortedRules) {
+                if (sellPrice >= rule.threshold) {
+                    return rule.discount;
+                }
+            }
+
+            return 0; // 没有满足条件的规则
+        }
+
+        // 从HTML获取神券规则数组
+        function getCouponRulesFromUI() {
+            const couponRules = [];
+            const ruleRows = document.querySelectorAll('#god-coupon-rules-meituan .coupon-rule-row');
+
+            ruleRows.forEach(row => {
+                const thresholdInput = row.querySelector('.coupon-threshold');
+                const discountInput = row.querySelector('.coupon-discount');
+
+                const threshold = parseFloat(thresholdInput.value) || 0;
+                const discount = parseFloat(discountInput.value) || 0;
+
+                if (threshold > 0 && discount > 0) {
+                    couponRules.push({
+                        threshold: threshold,
+                        discount: discount
+                    });
+                }
+            });
+
+            return couponRules;
+        }
+
+        // 神券输入框回车键导航
+        function focusNextCouponInput(currentInput) {
+            const container = document.getElementById('god-coupon-rules-meituan');
+            const allInputs = Array.from(container.querySelectorAll('.coupon-threshold, .coupon-discount'));
+            const currentIndex = allInputs.indexOf(currentInput);
+
+            if (currentIndex < allInputs.length - 1) {
+                // 跳转到下一个输入框
+                allInputs[currentIndex + 1].focus();
+                allInputs[currentIndex + 1].select();
+            } else {
+                // 已经是最后一个输入框，可以添加新行或跳转到其他字段
+                addCouponRuleMeituan();
+                // 延迟聚焦到新添加的输入框
+                setTimeout(() => {
+                    const newInputs = container.querySelectorAll('.coupon-threshold');
+                    if (newInputs.length > 0) {
+                        const lastInput = newInputs[newInputs.length - 1];
+                        lastInput.focus();
+                    }
+                }, 50);
+            }
+        }
+
+        // 添加神券规则
+        function addCouponRuleMeituan() {
+            const container = document.getElementById('god-coupon-rules-meituan');
+            const ruleRows = container.querySelectorAll('.coupon-rule-row');
+            const newIndex = ruleRows.length;
+
+            const newRow = document.createElement('div');
+            newRow.className = 'coupon-rule-row';
+            newRow.setAttribute('data-index', newIndex);
+            newRow.style.cssText = 'display: flex; margin-bottom: 5px; align-items: center;';
+            newRow.innerHTML = `
+                <input type="number" class="coupon-threshold" placeholder="满多少" style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input type="number" class="coupon-discount" placeholder="减多少" style="width:35%; margin-right:5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button class="btn btn-sm btn-danger" onclick="removeCouponRuleMeituan(${newIndex})" style="padding: 6px 10px; font-size: 0.8rem;" title="删除">×</button>
+            `;
+
+            container.appendChild(newRow);
+        }
+
+        // 删除神券规则
+        function removeCouponRuleMeituan(index) {
+            const container = document.getElementById('god-coupon-rules-meituan');
+            const ruleRows = container.querySelectorAll('.coupon-rule-row');
+
+            // 至少保留一个规则
+            if (ruleRows.length <= 1) {
+                alert('至少需要保留一个神券规则');
+                return;
+            }
+
+            // 找到要删除的行
+            const rowToRemove = container.querySelector(`.coupon-rule-row[data-index="${index}"]`);
+            if (rowToRemove) {
+                rowToRemove.remove();
+
+                // 重新索引所有行
+                updateCouponRuleIndices();
+            }
+        }
+
+        // 更新神券规则索引
+        function updateCouponRuleIndices() {
+            const container = document.getElementById('god-coupon-rules-meituan');
+            const ruleRows = container.querySelectorAll('.coupon-rule-row');
+
+            ruleRows.forEach((row, index) => {
+                row.setAttribute('data-index', index);
+                const deleteBtn = row.querySelector('.btn-danger');
+                if (deleteBtn) {
+                    deleteBtn.setAttribute('onclick', `removeCouponRuleMeituan(${index})`);
+                }
+            });
+        }
+
+        // 迭代计算卖价（已知客付价）- 修正版
+        function calculateSellPriceByIteration(paymentPrice, subsidyRate, couponRules, fixedDiscountRate) {
+            if (!paymentPrice || paymentPrice <= 0) return 0;
+
+            // 最大迭代次数和收敛阈值
+            const maxIterations = 10;
+            const epsilon = 0.01;
+
+            // 第一次猜测：假设没有神券
+            let currentSellPrice = paymentPrice / (1 - fixedDiscountRate - subsidyRate);
+
+            // 记录上次的神券金额，用于检查收敛
+            let lastCouponAmount = 0;
+
+            for (let i = 0; i < maxIterations; i++) {
+                // 1. 根据当前卖价确定神券金额
+                const couponAmount = getApplicableCouponAmount(currentSellPrice, couponRules);
+
+                // 2. 检查总折扣率有效性
+                const totalDiscountRate = fixedDiscountRate + subsidyRate;
+                if (totalDiscountRate >= 1) {
+                    alert('总折扣率超过100%，请检查平台补贴率是否过大');
+                    return currentSellPrice;
+                }
+
+                // 3. 计算新的卖价
+                const newSellPrice = (paymentPrice + couponAmount) / (1 - totalDiscountRate);
+
+                // 4. 检查收敛条件
+                const priceDiff = Math.abs(newSellPrice - currentSellPrice);
+
+                // 如果价格变化很小且神券金额稳定，则认为收敛
+                if (priceDiff < epsilon && couponAmount === lastCouponAmount) {
+                    return newSellPrice;
+                }
+
+                // 5. 更新为新的卖价
+                currentSellPrice = newSellPrice;
+                lastCouponAmount = couponAmount;
+            }
+
+            // 迭代次数用完，返回最后一次计算结果
+            console.warn('迭代计算未完全收敛，使用最后一次计算结果');
+            return currentSellPrice;
+        }
+
+        // 格式化显示神券规则
+        function formatCouponRules(couponRules) {
+            if (!couponRules || couponRules.length === 0) return '无';
+
+            return couponRules.map(rule => `满${rule.threshold}减${rule.discount}`).join(', ');
+        }
+
+        // 逆推计算（美团）- 修正版
+        function calculateReverseMeituan() {
+            const paymentPrice = parseFloat(document.getElementById('payment-price-meituan').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('sell-price-meituan').value) || 0;
+            const subsidyRateInput = parseFloat(document.getElementById('platform-subsidy-amount-meituan').value) || 0;
+            const earlyBookEnabled = document.getElementById('early-book-switch-meituan').checked;
+
+            // 获取神券规则
+            const couponRules = getCouponRulesFromUI();
+
+            if (!paymentPrice && !sellPrice) {
+                alert('请至少输入支付价或卖价');
+                return;
+            }
+
+            // 将用户输入的补贴百分比转换为小数
+            const subsidyRate = subsidyRateInput / 100;
+
+            let calculatedSellPrice, calculatedBasePrice;
+            let godCouponAmount = 0;
+
+            if (paymentPrice && !sellPrice) {
+                // 已知客付价，逆推卖价
+                if (!subsidyRateInput) {
+                    alert('请输入平台补贴率（百分比）');
+                    return;
+                }
+
+                // 计算固定折扣率（会员折扣 + 早定优惠）
+                const fixedDiscountRate = MEMBER_DISCOUNT_RATE_MEITUAN +
+                    (earlyBookEnabled ? EARLY_BOOK_RATE_MEITUAN : 0);
+
+                // 使用迭代法计算卖价
+                calculatedSellPrice = calculateSellPriceByIteration(
+                    paymentPrice,
+                    subsidyRate, // 传入的是补贴率，不是金额
+                    couponRules,
+                    fixedDiscountRate
+                );
+
+                // 根据最终卖价确定实际使用的神券金额
+                godCouponAmount = getApplicableCouponAmount(calculatedSellPrice, couponRules);
+
+                // 向上取整，避免误差
+                calculatedSellPrice = Math.ceil(calculatedSellPrice);
+
+            } else if (sellPrice) {
+                // 已知卖价
+                calculatedSellPrice = Math.ceil(sellPrice); // 向上取整，避免误差
+
+                // 确定神券金额
+                godCouponAmount = getApplicableCouponAmount(calculatedSellPrice, couponRules);
+            }
+
+            // 计算平台补贴金额（根据卖价和补贴率计算）
+            const platformSubsidyAmount = calculatePlatformSubsidyAmountMeituan(calculatedSellPrice, subsidyRate);
+
+            // 计算底价
+            const commissionRateMeituan = parseFloat(document.getElementById('commission-rate-meituan').value) / 100 || COMMISSION_RATE_MEITUAN;
+            calculatedBasePrice = Math.ceil(calculatedSellPrice * (1 - commissionRateMeituan)) - 1; // 向上取整，避免误差，减1元修正误差
+
+            // 计算各个折扣金额
+            // 会员折扣向上取整
+            const memberDiscountAmount = Math.ceil(calculatedSellPrice * MEMBER_DISCOUNT_RATE_MEITUAN);
+            // 早定优惠四舍五入取整数
+            const earlyBookAmount = earlyBookEnabled ? Math.round(calculatedSellPrice * EARLY_BOOK_RATE_MEITUAN) : 0;
+
+            // 计算客付价（验证）
+            const calculatedPaymentPrice = calculatedSellPrice - memberDiscountAmount - earlyBookAmount - platformSubsidyAmount - godCouponAmount;
+
+            // 显示结果
+            const resultDiv = document.getElementById('reverse-result-meituan');
+            resultDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">客付价（支付价）：</span>
+                    <span class="result-value">¥${(paymentPrice || calculatedPaymentPrice).toFixed(2)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">卖价：</span>
+                    <span class="result-value">¥${Math.round(calculatedSellPrice)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">底价：</span>
+                    <span class="result-value">¥${Math.round(calculatedBasePrice)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">会员折扣（85折）：</span>
+                    <span class="result-value">¥${memberDiscountAmount} (${(MEMBER_DISCOUNT_RATE_MEITUAN * 100).toFixed(0)}%折扣)</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">早定优惠（98折）：</span>
+                    <span class="result-value">¥${earlyBookAmount} (${(EARLY_BOOK_RATE_MEITUAN * 100).toFixed(0)}%折扣)</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">使用神券：</span>
+                    <span class="result-value">¥${Math.round(godCouponAmount)} (${formatCouponRules(couponRules)})</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">平台补贴：</span>
+                    <span class="result-value">¥${platformSubsidyAmount.toFixed(2)} (${subsidyRateInput}%)</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">验证公式：</span>
+                    <span class="result-value">${Math.round(calculatedSellPrice)} - ${memberDiscountAmount} - ${earlyBookAmount} - ${platformSubsidyAmount.toFixed(2)} - ${Math.round(godCouponAmount)} = ${calculatedPaymentPrice.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        // 计算单个房型价格（美团）- 修正版
+        function calculateRoomPriceMeituan(index) {
+            const paymentPrice = parseFloat(document.querySelectorAll('.room-price-meituan')[index].value) || 0;
+            if (!paymentPrice) {
+                alert('请输入客付价');
+                return;
+            }
+
+            // 获取平台补贴率和神券规则
+            const subsidyRateInput = parseFloat(document.getElementById('platform-subsidy-amount-meituan').value) || 0;
+            const earlyBookEnabled = document.getElementById('early-book-switch-meituan').checked;
+            const couponRules = getCouponRulesFromUI();
+
+            // 将用户输入的补贴百分比转换为小数
+            const subsidyRate = subsidyRateInput / 100;
+
+            // 计算固定折扣率
+            const fixedDiscountRate = MEMBER_DISCOUNT_RATE_MEITUAN +
+                (earlyBookEnabled ? EARLY_BOOK_RATE_MEITUAN : 0);
+
+            let sellPrice = 0;
+
+            // 如果有平台补贴率，使用迭代计算
+            if (subsidyRate > 0) {
+                // 使用迭代法计算卖价
+                sellPrice = calculateSellPriceByIteration(
+                    paymentPrice,
+                    subsidyRate,
+                    couponRules,
+                    fixedDiscountRate
+                );
+            } else {
+                // 没有平台补贴，简化计算
+                // 先估算卖价
+                const estimatedSellPrice = paymentPrice / (1 - fixedDiscountRate);
+                const godCouponAmount = getApplicableCouponAmount(estimatedSellPrice, couponRules);
+
+                // 重新计算卖价
+                sellPrice = (paymentPrice + godCouponAmount) / (1 - fixedDiscountRate);
+            }
+
+            // 计算平台补贴金额（根据卖价和补贴率计算）
+            const platformSubsidyAmount = calculatePlatformSubsidyAmountMeituan(sellPrice, subsidyRate);
+
+            // 计算底价
+            const commissionRateMeituan = parseFloat(document.getElementById('commission-rate-meituan').value) / 100 || COMMISSION_RATE_MEITUAN;
+            const basePrice = Math.round(sellPrice * (1 - commissionRateMeituan)) - 1; // 四舍五入取整数，减1元修正误差
+
+            // 更新显示
+            const row = document.querySelectorAll('#room-type-table-meituan tbody tr')[index];
+            row.querySelector('.sell-price-display-meituan').textContent = `¥${Math.round(sellPrice)}`;
+            row.querySelector('.base-price-display-meituan').textContent = `¥${basePrice}`;
+            row.querySelector('.platform-subsidy-display-meituan').textContent = `¥${platformSubsidyAmount.toFixed(2)}`;
+
+            // 更新房型概览表格
+            updateMeituanOverview();
+        }
+
+        // 应用差价设置（美团）
+        function applyPriceDiffMeituan() {
+            const basePrice = parseFloat(document.getElementById('base-price-meituan').value) || 0;
+            const roomPriceDiff = parseFloat(document.getElementById('room-price-diff-meituan').value) || 0;
+
+            if (!basePrice) {
+                alert('请输入基准房型价格');
+                return;
+            }
+
+            // 更新房型价格，基于基准价格和统一差价
+            const roomCount = document.querySelectorAll('.room-price-meituan').length;
+
+            for (let i = 0; i < roomCount; i++) {
+                const price = basePrice + (i * roomPriceDiff);
+                const input = document.querySelectorAll('.room-price-meituan')[i];
+                if (input) {
+                    input.value = price;
+                    calculateRoomPriceMeituan(i);
+                }
+            }
+        }
+
+        // 添加房型（美团）
+        function addRoomMeituan() {
+            const tbody = document.querySelector('#room-type-table-meituan tbody');
+            const rowCount = tbody.children.length;
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+                <td>新房型${rowCount + 1}</td>
+                <td><input type="number" class="room-price-meituan" data-index="${rowCount}" placeholder="请输入客付价"></td>
+                <td class="sell-price-display-meituan"></td>
+                <td class="base-price-display-meituan"></td>
+                <td class="platform-subsidy-display-meituan"></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-warning" onclick="moveUpMeituan(${rowCount})">↑</button>
+                        <button class="btn btn-sm btn-warning" onclick="moveDownMeituan(${rowCount})">↓</button>
+                        <button class="btn btn-sm btn-success" onclick="calculateRoomPriceMeituan(${rowCount})">计算</button>
+                        <button class="btn btn-sm btn-danger" onclick="removeRoomMeituan(${rowCount})">删除</button>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(newRow);
+
+            // 更新索引
+            updateRowIndicesMeituan();
+        }
+
+        // 删除房型（美团）
+        function removeRoomMeituan(index) {
+            const tbody = document.querySelector('#room-type-table-meituan tbody');
+            if (tbody.children.length > 1) {
+                tbody.removeChild(tbody.children[index]);
+                updateRowIndicesMeituan();
+            } else {
+                alert('至少保留一个房型');
+            }
+        }
+
+        // 上移房型（美团）
+        function moveUpMeituan(index) {
+            if (index > 0) {
+                const tbody = document.querySelector('#room-type-table-meituan tbody');
+                const row = tbody.children[index];
+                tbody.insertBefore(row, tbody.children[index - 1]);
+                updateRowIndicesMeituan();
+            }
+        }
+
+        // 下移房型（美团）
+        function moveDownMeituan(index) {
+            const tbody = document.querySelector('#room-type-table-meituan tbody');
+            if (index < tbody.children.length - 1) {
+                const row = tbody.children[index];
+                tbody.insertBefore(row, tbody.children[index + 2]);
+                updateRowIndicesMeituan();
+            }
+        }
+
+        // 更新行索引（美团）
+        function updateRowIndicesMeituan() {
+            const rows = document.querySelectorAll('#room-type-table-meituan tbody tr');
+            rows.forEach((row, index) => {
+                // 更新输入框索引
+                const input = row.querySelector('.room-price-meituan');
+                if (input) {
+                    input.setAttribute('data-index', index);
+                }
+
+                // 更新按钮点击事件
+                const buttons = row.querySelectorAll('button');
+                if (buttons.length >= 4) {
+                    buttons[0].setAttribute('onclick', `moveUpMeituan(${index})`);
+                    buttons[1].setAttribute('onclick', `moveDownMeituan(${index})`);
+                    buttons[2].setAttribute('onclick', `calculateRoomPriceMeituan(${index})`);
+                    buttons[3].setAttribute('onclick', `removeRoomMeituan(${index})`);
+                }
+            });
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loading-indicator').style.display = 'block';
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loading-indicator').style.display = 'none';
+        }
+
+        // 批量计算所有房型（携程）
+        function calculateAllRoomPrices() {
+            const roomCount = document.querySelectorAll('.room-price').length;
+            let calculatedCount = 0;
+
+            // 显示加载状态
+            showLoading();
+
+            // 使用setTimeout模拟异步计算，避免界面卡顿
+            setTimeout(() => {
+                for (let i = 0; i < roomCount; i++) {
+                    const input = document.querySelectorAll('.room-price')[i];
+                    if (input && input.value) {
+                        calculateRoomPrice(i);
+                        calculatedCount++;
+                    }
+                }
+
+                // 隐藏加载状态
+                hideLoading();
+
+                // 显示操作反馈
+                if (calculatedCount === 0) {
+                    alert('请先输入房型价格');
+                }
+            }, 100);
+        }
+
+        // 批量计算所有房型（美团）
+        function calculateAllRoomPricesMeituan() {
+            const roomCount = document.querySelectorAll('.room-price-meituan').length;
+            let calculatedCount = 0;
+
+            // 显示加载状态
+            showLoading();
+
+            // 使用setTimeout模拟异步计算，避免界面卡顿
+            setTimeout(() => {
+                for (let i = 0; i < roomCount; i++) {
+                    const input = document.querySelectorAll('.room-price-meituan')[i];
+                    if (input && input.value) {
+                        calculateRoomPriceMeituan(i);
+                        calculatedCount++;
+                    }
+                }
+
+                // 隐藏加载状态
+                hideLoading();
+
+                // 显示操作反馈
+                if (calculatedCount === 0) {
+                    alert('请先输入房型价格');
+                }
+            }, 100);
+        }
+
+        // 折扣弹窗相关函数
+        function showDiscountModal(platform) {
+            const modal = document.getElementById('discount-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+
+            if (platform === 'ctrip') {
+                title.textContent = '修改携程折扣';
+                content.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <label>会员折扣率（当前：${(MEMBER_DISCOUNT_RATE * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-member-rate" value="${MEMBER_DISCOUNT_RATE * 100}" placeholder="请输入会员折扣率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>天天特价率（当前：${(DAILY_SPECIAL_RATE * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-daily-rate" value="${DAILY_SPECIAL_RATE * 100}" placeholder="请输入天天特价率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>场景促销率（当前：${(SCENE_PROMO_RATE * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-scene-rate" value="${SCENE_PROMO_RATE * 100}" placeholder="请输入场景促销率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>酒店红包率（当前：${(HOTEL_RED_PACKET_RATE * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-redpacket-rate" value="${HOTEL_RED_PACKET_RATE * 100}" placeholder="请输入酒店红包率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                `;
+            } else if (platform === 'meituan') {
+                title.textContent = '修改美团折扣';
+                content.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <label>会员折扣率（当前：${(MEMBER_DISCOUNT_RATE_MEITUAN * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-member-rate-meituan" value="${MEMBER_DISCOUNT_RATE_MEITUAN * 100}" placeholder="请输入会员折扣率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>早定优惠率（当前：${(EARLY_BOOK_RATE_MEITUAN * 100).toFixed(0)}%）</label>
+                        <input type="number" id="modal-early-rate-meituan" value="${EARLY_BOOK_RATE_MEITUAN * 100}" placeholder="请输入早定优惠率" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                `;
+            }
+
+            modal.style.display = 'block';
+            modal.dataset.platform = platform;
+        }
+
+        function closeDiscountModal() {
+            document.getElementById('discount-modal').style.display = 'none';
+        }
+
+        function saveDiscounts() {
+            const modal = document.getElementById('discount-modal');
+            const platform = modal.dataset.platform;
+
+            if (platform === 'ctrip') {
+                const memberRate = parseFloat(document.getElementById('modal-member-rate').value) || 0;
+                const dailyRate = parseFloat(document.getElementById('modal-daily-rate').value) || 0;
+                const sceneRate = parseFloat(document.getElementById('modal-scene-rate').value) || 0;
+                const redpacketRate = parseFloat(document.getElementById('modal-redpacket-rate').value) || 0;
+
+                MEMBER_DISCOUNT_RATE = memberRate / 100;
+                DAILY_SPECIAL_RATE = dailyRate / 100;
+                SCENE_PROMO_RATE = sceneRate / 100;
+                HOTEL_RED_PACKET_RATE = redpacketRate / 100;
+
+                // 重新计算
+                calculateReverse();
+            } else if (platform === 'meituan') {
+                const memberRate = parseFloat(document.getElementById('modal-member-rate-meituan').value) || 0;
+                const earlyRate = parseFloat(document.getElementById('modal-early-rate-meituan').value) || 0;
+
+                MEMBER_DISCOUNT_RATE_MEITUAN = memberRate / 100;
+                EARLY_BOOK_RATE_MEITUAN = earlyRate / 100;
+
+                // 重新计算
+                calculateReverseMeituan();
+            }
+
+            closeDiscountModal();
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function () {
+            // 清除所有默认值
+            clearAllDefaultValues();
+        });
+
+        // 清除所有默认值
+        function clearAllDefaultValues() {
+            // 清除携程默认值
+            document.getElementById('payment-price').value = '';
+            document.getElementById('sell-price').value = '';
+            document.getElementById('platform-subsidy-amount').value = '';
+            document.getElementById('base-price').value = '';
+            document.getElementById('room-price-diff').value = '';
+
+            // 清除携程房型输入框
+            const ctripInputs = document.querySelectorAll('.room-price');
+            ctripInputs.forEach(input => {
+                input.value = '';
+            });
+
+            // 清除美团默认值
+            document.getElementById('payment-price-meituan').value = '';
+            document.getElementById('sell-price-meituan').value = '';
+            document.getElementById('platform-subsidy-amount-meituan').value = '';
+            document.getElementById('base-price-meituan').value = '';
+            document.getElementById('room-price-diff-meituan').value = '';
+
+
+            // 清除美团神券规则输入框
+            const couponThresholds = document.querySelectorAll('#god-coupon-rules-meituan .coupon-threshold');
+            const couponDiscounts = document.querySelectorAll('#god-coupon-rules-meituan .coupon-discount');
+
+            couponThresholds.forEach(input => input.value = '');
+            couponDiscounts.forEach(input => input.value = '');
+
+            // 清除美团房型输入框
+            const meituanInputs = document.querySelectorAll('.room-price-meituan');
+            meituanInputs.forEach(input => {
+                input.value = '';
+            });
+        }
+
+        // 修复美团批量改价按钮点击事件
+        document.addEventListener('DOMContentLoaded', function () {
+            // 确保美团批量改价按钮能正常工作
+            const meituanApplyButton = document.querySelector('[onclick="applyPriceDiffMeituan()"]');
+            if (meituanApplyButton) {
+                meituanApplyButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    applyPriceDiffMeituan();
+                });
+            }
+
+            // 确保携程批量改价按钮能正常工作
+            const ctripApplyButton = document.querySelector('[onclick="applyPriceDiff()"]');
+            if (ctripApplyButton) {
+                ctripApplyButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    applyPriceDiff();
+                });
+            }
+
+            // 点击弹窗外区域关闭弹窗
+            document.getElementById('discount-modal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeDiscountModal();
+                }
+            });
+        });
+
+        // 平台间价格同步函数
+        let syncTimeout = null;
+        function syncPriceBetweenPlatforms(sourcePlatform, index, value) {
+            // 清除之前的定时器，避免频繁触发
+            if (syncTimeout) {
+                clearTimeout(syncTimeout);
+            }
+
+            // 设置300ms延迟，确保数据同步实时响应且避免频繁触发
+            syncTimeout = setTimeout(() => {
+                if (sourcePlatform === 'ctrip') {
+                    // 从携程同步到美团
+                    const meituanInput = document.querySelectorAll('#room-type-table-meituan .room-price-meituan')[index];
+                    if (meituanInput && meituanInput.value !== value) {
+                        meituanInput.value = value;
+                    }
+                } else if (sourcePlatform === 'meituan') {
+                    // 从美团同步到携程
+                    const ctripInput = document.querySelectorAll('#room-type-table .room-price')[index];
+                    if (ctripInput && ctripInput.value !== value) {
+                        ctripInput.value = value;
+                    }
+                }
+            }, 300);
+        }
+
+        // 处理回车键自动跳转到下一个输入框
+        function handleEnterKeyForRoomPriceInputs(inputs) {
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        e.preventDefault();
+                        const nextIndex = index + 1;
+                        if (nextIndex < inputs.length) {
+                            // 跳转到下一个输入框
+                            inputs[nextIndex].focus();
+                            inputs[nextIndex].select();
+                        } else {
+                            // 最后一个输入框，保持光标在当前输入框内
+                            this.focus();
+                            this.select();
+                        }
+                    }
+                });
+            });
+        }
+
+        // 初始化房型表格和数据同步
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化携程房型表 - 不自动填充值
+            const ctripRoomInputs = document.querySelectorAll('#room-type-table .room-price');
+            ctripRoomInputs.forEach((input, index) => {
+                // 不设置默认值，留空让用户输入
+                // 添加输入事件监听器，实现数据同步
+                input.addEventListener('input', function () {
+                    syncPriceBetweenPlatforms('ctrip', index, this.value);
+                    // 同时更新房型概览表格
+                    updateCtripOverview();
+                });
+            });
+
+            // 为携程平台输入框添加回车键事件监听器
+            handleEnterKeyForRoomPriceInputs(ctripRoomInputs);
+
+            // 初始化美团房型表 - 不自动填充值
+            const meituanRoomInputs = document.querySelectorAll('#room-type-table-meituan .room-price-meituan');
+            meituanRoomInputs.forEach((input, index) => {
+                // 不设置默认值，留空让用户输入
+                // 添加输入事件监听器，实现数据同步
+                input.addEventListener('input', function () {
+                    syncPriceBetweenPlatforms('meituan', index, this.value);
+                    // 同时更新房型概览表格
+                    updateMeituanOverview();
+                });
+            });
+
+            // 为美团平台输入框添加回车键事件监听器
+            handleEnterKeyForRoomPriceInputs(meituanRoomInputs);
+
+            // 为神券规则输入框添加回车键事件监听器（使用事件委托）
+            const couponRulesContainer = document.getElementById('god-coupon-rules-meituan');
+            if (couponRulesContainer) {
+                couponRulesContainer.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' && e.target.matches('.coupon-threshold, .coupon-discount')) {
+                        e.preventDefault();
+                        focusNextCouponInput(e.target);
+                    }
+                });
+            }
+        });
+
+        // ====================== 房型概览同步功能 ======================
+
+        // 房型名称到概览行的映射
+        const ROOM_DISPLAY_ORDER = ['大床房', '投影房', '浴缸房', '商务房', '亲子房', '双床房', '行政套房'];
+
+        // 更新携程概览表格
+        function updateCtripOverview() {
+            const mainTable = document.getElementById('room-type-table');
+            const mainRows = mainTable.querySelectorAll('tbody tr');
+            const overviewTable = document.getElementById('room-overview-table-ctrip');
+            const overviewRows = overviewTable.querySelectorAll('tbody tr');
+
+            // 遍历主表格的行，根据房型名称找到对应的概览行并更新
+            mainRows.forEach(row => {
+                const roomName = row.querySelector('td:first-child').textContent;
+                const overviewRow = overviewTable.querySelector(`tr[data-room="${roomName}"]`);
+
+                if (overviewRow) {
+                    const paymentInput = row.querySelector('.room-price');
+                    const sellDisplay = row.querySelector('.sell-price-display');
+                    const baseDisplay = row.querySelector('.base-price-display');
+                    const subsidyDisplay = row.querySelector('.platform-subsidy-display');
+
+                    overviewRow.querySelector('.overview-payment').textContent =
+                        paymentInput && paymentInput.value ? `¥${paymentInput.value}` : '--';
+
+                    const douyinDisplay = overviewRow.querySelector('.douyin-price-display');
+                    if (paymentInput && paymentInput.value) {
+                        const paymentPrice = parseFloat(paymentInput.value) || 0;
+                        const douyinPrice = paymentPrice + 20;
+                        douyinDisplay.textContent = `¥${douyinPrice}`;
+                    } else {
+                        douyinDisplay.textContent = '--';
+                    }
+
+                    if (sellDisplay && sellDisplay.textContent && sellDisplay.textContent !== '--') {
+                        const originalSellPrice = parseFloat(sellDisplay.textContent.replace('¥', ''));
+                        overviewRow.querySelector('.sell-price-display').textContent = `¥${originalSellPrice}`;
+                    } else {
+                        overviewRow.querySelector('.sell-price-display').textContent = '--';
+                    }
+                    overviewRow.querySelector('.base-price-display').textContent = baseDisplay ? baseDisplay.textContent : '--';
+                    overviewRow.querySelector('.platform-subsidy-display').textContent = subsidyDisplay ? subsidyDisplay.textContent : '--';
+                }
+            });
+        }
+
+        // 更新美团概览表格
+        function updateMeituanOverview() {
+            const mainTable = document.getElementById('room-type-table-meituan');
+            const mainRows = mainTable.querySelectorAll('tbody tr');
+            const overviewTable = document.getElementById('room-overview-table-meituan');
+
+            // 遍历主表格的行，根据房型名称找到对应的概览行并更新
+            mainRows.forEach(row => {
+                const roomName = row.querySelector('td:first-child').textContent;
+                const overviewRow = overviewTable.querySelector(`tr[data-room="${roomName}"]`);
+
+                if (overviewRow) {
+                    const paymentInput = row.querySelector('.room-price-meituan');
+                    const sellDisplay = row.querySelector('.sell-price-display-meituan');
+                    const baseDisplay = row.querySelector('.base-price-display-meituan');
+                    const subsidyDisplay = row.querySelector('.platform-subsidy-display-meituan');
+
+                    overviewRow.querySelector('.overview-payment').textContent =
+                        paymentInput && paymentInput.value ? `¥${paymentInput.value}` : '--';
+
+                    const douyinDisplay = overviewRow.querySelector('.douyin-price-display');
+                    if (paymentInput && paymentInput.value) {
+                        const paymentPrice = parseFloat(paymentInput.value) || 0;
+                        const douyinPrice = paymentPrice + 20;
+                        douyinDisplay.textContent = `¥${douyinPrice}`;
+                    } else {
+                        douyinDisplay.textContent = '--';
+                    }
+
+                    if (sellDisplay && sellDisplay.textContent && sellDisplay.textContent !== '--') {
+                        const originalSellPrice = parseFloat(sellDisplay.textContent.replace('¥', ''));
+                        overviewRow.querySelector('.sell-price-display-meituan').textContent = `¥${originalSellPrice}`;
+                    } else {
+                        overviewRow.querySelector('.sell-price-display-meituan').textContent = '--';
+                    }
+                    overviewRow.querySelector('.base-price-display-meituan').textContent = baseDisplay ? baseDisplay.textContent : '--';
+                    overviewRow.querySelector('.platform-subsidy-display-meituan').textContent = subsidyDisplay ? subsidyDisplay.textContent : '--';
+                }
+            });
+        }
+        document.addEventListener('click', function (e) {
+            if (!window.matchMedia('(max-width: 768px)').matches) return;
+
+            if (e.target.matches('#ctrip .mobile-bottom-tools::after')) return;
+        });
+
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .inland-security-footer {
+            position: fixed;
+            z-index: 10;
+            bottom: 0;
+            right: 0;
+            width: fit-content;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .tooltip-container {
+            position: relative;
+        }
+
+        .trigger-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .minimax-link {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 300;
+            color: #adadad;
+            text-decoration: none;
+        }
+
+        .minimax-link:visited {
+            color: #adadad;
+        }
+
+        .minimax-link:hover {
+            color: #666666;
+        }
+
+        .tooltip-content {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            padding-bottom: 16px;
+            /* 8px 内容间距 + 8px 用于鼠标移动的透明区域 */
+            font-size: 12px;
+            line-height: 17px;
+            background-color: #fafafa;
+            border-radius: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            color: #171717;
+        }
+
+        /* 创建透明的连接区域，让鼠标可以平滑移动到 tooltip */
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 16px;
+        }
+
+        .tooltip-container:hover .tooltip-content {
+            display: flex;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .beian-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #171717;
+        }
+
+        .beian-icon {
+            width: 14px;
+            height: 14px;
+            margin-right: 2px;
+        }
+
+        .underline-text {
+            color: #171717;
+            text-decoration: underline;
+        }
+
+        .underline-text:hover {
+            color: #000000;
+        }
+
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            .trigger-content {
+                background-color: transparent;
+            }
+
+            .minimax-link,
+            .minimax-link:visited {
+                color: #666666;
+            }
+
+            .minimax-link:hover {
+                color: #adadad;
+            }
+
+            .tooltip-content {
+                background-color: #262626;
+                color: #ededed;
+            }
+
+            .beian-link,
+            .underline-text {
+                color: #ededed;
+            }
+
+            .underline-text:hover {
+                color: #ffffff;
+            }
+        }
+    </style>
+
+</body>
+
+</html>
