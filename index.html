@@ -2355,17 +2355,56 @@
         let EARLY_BOOK_RATE_MEITUAN = 0.02;       // 早定优惠2%
 
         // ====================== 携程精准折扣算法 ======================
-        // 核心发现：所有折扣项基于卖价单独计算百分比后，统一使用向上取整(ceil)
-        // 正向公式：Pay = P - ceil(0.15P) - 2*ceil(0.1P) - ceil(0.03P) - ceil(subsidyRate*P)
+        // 核心规则：
+        // 1. 会员折扣15%、酒店红包10%、场景促销3%（可变）：基于卖价单独ceil向上取整
+        // 2. 平台补贴 = 天天特价10%（必有） + 平台额外补贴（不定时）
+        // 3. 天天特价固定ceil(P*10%)；额外补贴按标定比率ceil(P*xRate)计算
+        // 4. 逆推计算器输入补贴金额S时（金额模式），自动标定额外补贴率xRate
+        // 5. 房型列表使用自动标定的xRate逐行计算，确保每行补贴金额随卖价动态变化
+        // 正向公式（有额外补贴率xRate）：Pay = P - ceil(0.15P) - ceil(0.1P) - ceil(场景率×P) - ceil(0.1P) - ceil(xRate×P)
+        // 正向公式（金额模式，用于标定）：Pay = P - ceil(0.15P) - ceil(0.1P) - ceil(场景率×P) - S
 
-        function ctripForwardCalc(sellPrice, scenePromoRate, platformSubsidyRate) {
+        let autoExtraSubsidyRate = 0;
+
+        function detectExtraSubsidyRate(P, extraSubsidy) {
+            if (extraSubsidy <= 0) return 0;
+            for (let r = 1; r <= 20; r++) {
+                const rate = r / 100;
+                if (Math.ceil(P * rate) === extraSubsidy) {
+                    return rate;
+                }
+            }
+            return extraSubsidy / P;
+        }
+
+        function ctripForwardCalc(sellPrice, scenePromoRate, platformSubsidyAmount, extraSubsidyRate) {
             const P = Math.round(sellPrice);
             const memberDisc = Math.ceil(P * MEMBER_DISCOUNT_RATE);
-            const dailyDisc = Math.ceil(P * DAILY_SPECIAL_RATE);
             const redPacketDisc = Math.ceil(P * HOTEL_RED_PACKET_RATE);
             const sceneDisc = scenePromoRate > 0 ? Math.ceil(P * scenePromoRate) : 0;
-            const subsidyDisc = platformSubsidyRate > 0 ? Math.ceil(P * platformSubsidyRate) : 0;
-            const totalDisc = memberDisc + dailyDisc + redPacketDisc + sceneDisc + subsidyDisc;
+            const dailyDisc = Math.ceil(P * DAILY_SPECIAL_RATE);
+
+            const S = Math.round(platformSubsidyAmount) || 0;
+            const xRate = extraSubsidyRate || 0;
+            let extraSubsidy = 0;
+            let platformSubsidyTotal;
+            let usedRate = 0;
+
+            if (S > dailyDisc) {
+                platformSubsidyTotal = S;
+                extraSubsidy = S - dailyDisc;
+                usedRate = detectExtraSubsidyRate(P, extraSubsidy);
+            } else if (xRate > 0) {
+                extraSubsidy = Math.ceil(P * xRate);
+                platformSubsidyTotal = dailyDisc + extraSubsidy;
+                usedRate = xRate;
+            } else {
+                platformSubsidyTotal = dailyDisc;
+                extraSubsidy = 0;
+                usedRate = 0;
+            }
+
+            const totalDisc = memberDisc + redPacketDisc + sceneDisc + platformSubsidyTotal;
             const payPrice = P - totalDisc;
             return {
                 sellPrice: P,
@@ -2374,24 +2413,34 @@
                 dailySpecial: dailyDisc,
                 redPacket: redPacketDisc,
                 scenePromo: sceneDisc,
-                platformSubsidy: subsidyDisc,
+                platformSubsidy: platformSubsidyTotal,
+                extraSubsidy: extraSubsidy,
+                extraSubsidyRate: usedRate,
                 totalDiscount: totalDisc
             };
         }
 
-        function ctripReverseCalc(paymentPrice, scenePromoRate, platformSubsidyRate) {
+        function ctripReverseCalc(paymentPrice, scenePromoRate, platformSubsidyAmount, extraSubsidyRate) {
             const Pay = Math.round(paymentPrice);
-            const fixedDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + HOTEL_RED_PACKET_RATE + scenePromoRate + platformSubsidyRate;
-            const ceilErrorCount = 4 + (platformSubsidyRate > 0 ? 1 : 0);
-            const P_min = Math.ceil(Pay / (1 - 0));
-            const P_est = Pay / (1 - fixedDiscountRate);
-            const P_max = Math.floor((Pay + ceilErrorCount) / (1 - fixedDiscountRate)) + 2;
+            const S = Math.round(platformSubsidyAmount) || 0;
+            const xRate = extraSubsidyRate || 0;
+
+            const baseDiscountRate = MEMBER_DISCOUNT_RATE + HOTEL_RED_PACKET_RATE + scenePromoRate;
+            let P_est;
+            if (S > 0 && xRate === 0) {
+                P_est = (Pay + S) / (1 - baseDiscountRate);
+            } else if (xRate > 0) {
+                P_est = Pay / (1 - baseDiscountRate - DAILY_SPECIAL_RATE - xRate);
+            } else {
+                P_est = Pay / (1 - baseDiscountRate - DAILY_SPECIAL_RATE);
+            }
+
             let bestResult = null;
             let bestDiff = Infinity;
-            const startP = Math.max(1, Math.floor(P_est) - 10);
-            const endP = Math.floor(P_est) + 10;
+            const startP = Math.max(1, Math.floor(P_est) - 50);
+            const endP = Math.floor(P_est) + 50;
             for (let P = startP; P <= endP; P++) {
-                const result = ctripForwardCalc(P, scenePromoRate, platformSubsidyRate);
+                const result = ctripForwardCalc(P, scenePromoRate, (xRate > 0 ? 0 : S), xRate);
                 const diff = Math.abs(result.payPrice - Pay);
                 if (diff < bestDiff) {
                     bestDiff = diff;
@@ -2417,12 +2466,6 @@
             });
         });
 
-        // 计算平台补贴百分比（携程）
-        function calculatePlatformSubsidyRate(sellPrice, subsidyAmount) {
-            if (!sellPrice || !subsidyAmount) return 0;
-            return (subsidyAmount / sellPrice) - 0.1; // 减去天天特价的10%
-        }
-
         // 逆推计算（携程）
         function calculateReverse() {
             const paymentPrice = parseFloat(document.getElementById('payment-price').value) || 0;
@@ -2443,14 +2486,20 @@
 
             let result;
             if (paymentPrice) {
-                let platformSubsidyRate = 0;
-                if (subsidyAmountInput > 0 && sellPriceInput > 0) {
-                    const estResult = ctripReverseCalc(paymentPrice, scenePromoRate, 0);
-                    platformSubsidyRate = subsidyAmountInput / estResult.sellPrice;
-                }
-                result = ctripReverseCalc(paymentPrice, scenePromoRate, platformSubsidyRate);
+                result = ctripReverseCalc(paymentPrice, scenePromoRate, subsidyAmountInput);
             } else {
-                result = ctripForwardCalc(sellPriceInput, scenePromoRate, 0);
+                result = ctripForwardCalc(sellPriceInput, scenePromoRate, subsidyAmountInput);
+            }
+
+            if (!result) {
+                alert('无法计算，请检查输入数据');
+                return;
+            }
+
+            if (result.extraSubsidy > 0) {
+                autoExtraSubsidyRate = result.extraSubsidyRate;
+            } else if (subsidyAmountInput === 0) {
+                autoExtraSubsidyRate = 0;
             }
 
             const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
@@ -2458,6 +2507,17 @@
 
             const resultDiv = document.getElementById('reverse-result');
             const discountLabel = scenePromoRate > 0 ? `${(100 - scenePromoRateInput).toFixed(0)}折` : '无';
+
+            let extraSubsidyHtml = '';
+            if (result.extraSubsidy > 0) {
+                const extraRatePct = (result.extraSubsidyRate * 100).toFixed(1);
+                extraSubsidyHtml = `
+                <div class="result-item" style="padding-left:20px;color:#666;">
+                    <span class="result-label">　└ 平台额外补贴：</span>
+                    <span class="result-value">¥${result.extraSubsidy}（约${extraRatePct}%）</span>
+                </div>`;
+            }
+
             resultDiv.innerHTML = `
                 <div class="result-item">
                     <span class="result-label">客付价（支付价）：</span>
@@ -2476,40 +2536,58 @@
                     <span class="result-value">¥${result.memberDiscount}</span>
                 </div>
                 <div class="result-item">
-                    <span class="result-label">天天特价（9折）：</span>
-                    <span class="result-value">¥${result.dailySpecial}</span>
+                    <span class="result-label">酒店红包（9折）：</span>
+                    <span class="result-value">¥${result.redPacket}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">场景促销（${discountLabel}）：</span>
                     <span class="result-value">¥${result.scenePromo}</span>
                 </div>
                 <div class="result-item">
-                    <span class="result-label">酒店红包（9折）：</span>
-                    <span class="result-value">¥${result.redPacket}</span>
-                </div>
-                <div class="result-item">
                     <span class="result-label">平台补贴：</span>
                     <span class="result-value">¥${result.platformSubsidy}</span>
                 </div>
+                <div class="result-item" style="padding-left:20px;color:#666;">
+                    <span class="result-label">　└ 天天特价（9折）：</span>
+                    <span class="result-value">¥${result.dailySpecial}</span>
+                </div>${extraSubsidyHtml}
             `;
         }
 
         // 计算单个房型价格（携程）
-        function calculateRoomPrice(index) {
+        function calculateRoomPrice(index, silent) {
             const paymentPrice = parseFloat(document.querySelectorAll('.room-price')[index].value) || 0;
             if (!paymentPrice) {
-                alert('请输入支付价');
+                if (!silent) alert('请输入支付价');
                 return;
             }
 
             const scenePromoRateInput = parseFloat(document.getElementById('scene-promo-rate').value) || 0;
             if (scenePromoRateInput < 0 || scenePromoRateInput > 100) {
-                alert('场景促销折扣必须在0-100之间');
+                if (!silent) alert('场景促销折扣必须在0-100之间');
                 return;
             }
             const scenePromoRate = scenePromoRateInput / 100;
 
-            const result = ctripReverseCalc(paymentPrice, scenePromoRate, 0);
+            const subsidyAmountInput = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
+
+            let result;
+            if (autoExtraSubsidyRate > 0) {
+                result = ctripReverseCalc(paymentPrice, scenePromoRate, 0, autoExtraSubsidyRate);
+            } else if (subsidyAmountInput > 0) {
+                result = ctripReverseCalc(paymentPrice, scenePromoRate, subsidyAmountInput);
+                if (result && result.extraSubsidy > 0) {
+                    autoExtraSubsidyRate = result.extraSubsidyRate;
+                    result = ctripReverseCalc(paymentPrice, scenePromoRate, 0, autoExtraSubsidyRate);
+                }
+            } else {
+                result = ctripReverseCalc(paymentPrice, scenePromoRate, 0);
+            }
+
+            if (!result) {
+                if (!silent) alert('无法计算，请检查输入数据');
+                return;
+            }
 
             const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
             const basePrice = Math.ceil(result.sellPrice * (1 - commissionRate));
@@ -3272,6 +3350,8 @@
 
         // 清除所有默认值
         function clearAllDefaultValues() {
+            autoExtraSubsidyRate = 0;
+
             // 清除携程默认值
             document.getElementById('payment-price').value = '';
             document.getElementById('sell-price').value = '';
@@ -3444,8 +3524,45 @@
             });
         }
 
+        // 重新计算所有已填写支付价的携程房型
+        function recalculateAllCtripRooms() {
+            const roomInputs = document.querySelectorAll('#room-type-table .room-price');
+            roomInputs.forEach((input, index) => {
+                const price = parseFloat(input.value) || 0;
+                if (price > 0) {
+                    const sellDisplay = document.querySelectorAll('#room-type-table .sell-price-display')[index];
+                    if (sellDisplay && sellDisplay.textContent) {
+                        calculateRoomPrice(index, true);
+                    }
+                }
+            });
+        }
+
         // 初始化房型表格和数据同步
         document.addEventListener('DOMContentLoaded', function () {
+            // 监听携程配置参数变化，自动重算已计算的房型
+            const ctripConfigInputs = ['scene-promo-rate', 'commission-rate'];
+            ctripConfigInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', recalculateAllCtripRooms);
+                    el.addEventListener('change', recalculateAllCtripRooms);
+                }
+            });
+
+            // 平台补贴金额变化时：重置自动标定的补贴率，重算房型（第一个房型会重新标定）
+            const subsidyInput = document.getElementById('platform-subsidy-amount');
+            if (subsidyInput) {
+                subsidyInput.addEventListener('input', function () {
+                    autoExtraSubsidyRate = 0;
+                    recalculateAllCtripRooms();
+                });
+                subsidyInput.addEventListener('change', function () {
+                    autoExtraSubsidyRate = 0;
+                    recalculateAllCtripRooms();
+                });
+            }
+
             // 初始化携程房型表 - 不自动填充值
             const ctripRoomInputs = document.querySelectorAll('#room-type-table .room-price');
             ctripRoomInputs.forEach((input, index) => {
