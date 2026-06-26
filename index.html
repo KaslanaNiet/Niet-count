@@ -703,7 +703,7 @@
             }
 
             table {
-                min-width: 760px;
+                min-width: 860px;
                 margin-top: 12px;
             }
 
@@ -762,6 +762,7 @@
             /* 价格展示块缩小一点 */
             .base-price-display,
             .sell-price-display,
+            .douyin-price-display,
             .base-price-display-meituan,
             .sell-price-display-meituan {
                 padding: 6px 10px;
@@ -770,6 +771,7 @@
 
             .base-price-display::before,
             .sell-price-display::before,
+            .douyin-price-display::before,
             .base-price-display-meituan::before,
             .sell-price-display-meituan::before {
                 width: 18px;
@@ -808,7 +810,7 @@
             }
 
             table {
-                min-width: 700px;
+                min-width: 800px;
             }
 
             th,
@@ -1558,13 +1560,15 @@
         @media (max-width: 768px) {
 
             .base-price-display-meituan,
-            .sell-price-display-meituan {
+            .sell-price-display-meituan,
+            .douyin-price-display {
                 padding: 6px 10px;
                 font-size: 0.85rem;
             }
 
             .base-price-display-meituan::before,
-            .sell-price-display-meituan::before {
+            .sell-price-display-meituan::before,
+            .douyin-price-display::before {
                 width: 18px;
                 height: 18px;
                 font-size: 10px;
@@ -1662,6 +1666,7 @@
                                 <tr>
                                     <th>房型</th>
                                     <th>客付价</th>
+                                    <th>抖音价格</th>
                                     <th>卖价</th>
                                     <th>底价</th>
                                     <th>平台补贴</th>
@@ -1673,6 +1678,7 @@
                                     <td>投影房</td>
                                     <td><input type="number" class="room-price" data-index="0" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1690,6 +1696,7 @@
                                     <td>大床房</td>
                                     <td><input type="number" class="room-price" data-index="1" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1707,6 +1714,7 @@
                                     <td>双床房</td>
                                     <td><input type="number" class="room-price" data-index="2" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1724,6 +1732,7 @@
                                     <td>亲子房</td>
                                     <td><input type="number" class="room-price" data-index="3" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1741,6 +1750,7 @@
                                     <td>商务房</td>
                                     <td><input type="number" class="room-price" data-index="4" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1758,6 +1768,7 @@
                                     <td>浴缸房</td>
                                     <td><input type="number" class="room-price" data-index="5" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1775,6 +1786,7 @@
                                     <td>行政套房</td>
                                     <td><input type="number" class="room-price" data-index="6" placeholder="请输入客付价">
                                     </td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display"></td>
                                     <td class="base-price-display"></td>
                                     <td class="platform-subsidy-display"></td>
@@ -1903,7 +1915,7 @@
                     </div>
                     <div class="form-group">
                         <label>场景促销折扣 (%)</label>
-                        <input type="number" id="scene-promo-rate" value="5" placeholder="请输入场景促销折扣" min="0" max="100">
+                        <input type="number" id="scene-promo-rate" value="3" placeholder="请输入场景促销折扣" min="0" max="100">
                     </div>
                     <button class="btn"
                         style="background-color: #3498db; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
@@ -1952,6 +1964,7 @@
                                 <tr>
                                     <th>房型</th>
                                     <th style="width: 167.5px;">客付价</th>
+                                    <th>抖音价格</th>
                                     <th>卖价</th>
                                     <th>底价</th>
                                     <th>平台补贴</th>
@@ -1963,6 +1976,7 @@
                                     <td>投影房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="0"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -1982,6 +1996,7 @@
                                     <td>大床房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="1"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2001,6 +2016,7 @@
                                     <td>双床房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="2"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2020,6 +2036,7 @@
                                     <td>亲子房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="3"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2039,6 +2056,7 @@
                                     <td>商务房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="4"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2058,6 +2076,7 @@
                                     <td>浴缸房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="5"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2077,6 +2096,7 @@
                                     <td>行政套房</td>
                                     <td><input type="number" class="room-price-meituan" data-index="6"
                                             placeholder="请输入客付价"></td>
+                                    <td class="douyin-price-display"></td>
                                     <td class="sell-price-display-meituan"></td>
                                     <td class="base-price-display-meituan"></td>
                                     <td class="platform-subsidy-display-meituan"></td>
@@ -2326,13 +2346,61 @@
         let COMMISSION_RATE = 0.15;
         let MEMBER_DISCOUNT_RATE = 0.15; // 会员折扣15%
         let DAILY_SPECIAL_RATE = 0.1;    // 天天特价10%
-        let SCENE_PROMO_RATE = 0.05;     // 场景促销1%
+        let SCENE_PROMO_RATE = 0.03;     // 场景促销3%（携程外网固定）
         let HOTEL_RED_PACKET_RATE = 0.1; // 酒店红包10%
 
         // 美团
         let COMMISSION_RATE_MEITUAN = 0.12; // 美团佣金12%
         let MEMBER_DISCOUNT_RATE_MEITUAN = 0.15; // 会员折扣15%
         let EARLY_BOOK_RATE_MEITUAN = 0.02;       // 早定优惠2%
+
+        // ====================== 携程精准折扣算法 ======================
+        // 核心发现：所有折扣项基于卖价单独计算百分比后，统一使用向上取整(ceil)
+        // 正向公式：Pay = P - ceil(0.15P) - 2*ceil(0.1P) - ceil(0.03P) - ceil(subsidyRate*P)
+
+        function ctripForwardCalc(sellPrice, scenePromoRate, platformSubsidyRate) {
+            const P = Math.round(sellPrice);
+            const memberDisc = Math.ceil(P * MEMBER_DISCOUNT_RATE);
+            const dailyDisc = Math.ceil(P * DAILY_SPECIAL_RATE);
+            const redPacketDisc = Math.ceil(P * HOTEL_RED_PACKET_RATE);
+            const sceneDisc = scenePromoRate > 0 ? Math.ceil(P * scenePromoRate) : 0;
+            const subsidyDisc = platformSubsidyRate > 0 ? Math.ceil(P * platformSubsidyRate) : 0;
+            const totalDisc = memberDisc + dailyDisc + redPacketDisc + sceneDisc + subsidyDisc;
+            const payPrice = P - totalDisc;
+            return {
+                sellPrice: P,
+                payPrice: payPrice,
+                memberDiscount: memberDisc,
+                dailySpecial: dailyDisc,
+                redPacket: redPacketDisc,
+                scenePromo: sceneDisc,
+                platformSubsidy: subsidyDisc,
+                totalDiscount: totalDisc
+            };
+        }
+
+        function ctripReverseCalc(paymentPrice, scenePromoRate, platformSubsidyRate) {
+            const Pay = Math.round(paymentPrice);
+            const fixedDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + HOTEL_RED_PACKET_RATE + scenePromoRate + platformSubsidyRate;
+            const ceilErrorCount = 4 + (platformSubsidyRate > 0 ? 1 : 0);
+            const P_min = Math.ceil(Pay / (1 - 0));
+            const P_est = Pay / (1 - fixedDiscountRate);
+            const P_max = Math.floor((Pay + ceilErrorCount) / (1 - fixedDiscountRate)) + 2;
+            let bestResult = null;
+            let bestDiff = Infinity;
+            const startP = Math.max(1, Math.floor(P_est) - 10);
+            const endP = Math.floor(P_est) + 10;
+            for (let P = startP; P <= endP; P++) {
+                const result = ctripForwardCalc(P, scenePromoRate, platformSubsidyRate);
+                const diff = Math.abs(result.payPrice - Pay);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestResult = result;
+                    if (diff === 0) break;
+                }
+            }
+            return bestResult;
+        }
 
         // 页面切换
         document.querySelectorAll('.tab').forEach(tab => {
@@ -2358,18 +2426,14 @@
         // 逆推计算（携程）
         function calculateReverse() {
             const paymentPrice = parseFloat(document.getElementById('payment-price').value) || 0;
-            const sellPrice = parseFloat(document.getElementById('sell-price').value) || 0;
-            const subsidyAmount = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
+            const sellPriceInput = parseFloat(document.getElementById('sell-price').value) || 0;
+            const subsidyAmountInput = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
 
-            if (!paymentPrice && !sellPrice) {
+            if (!paymentPrice && !sellPriceInput) {
                 alert('请至少输入支付价或卖价');
                 return;
             }
 
-            // 计算平台补贴百分比
-            const platformSubsidyRate = calculatePlatformSubsidyRate(sellPrice, subsidyAmount);
-
-            // 获取场景促销折扣并验证
             const scenePromoRateInput = parseFloat(document.getElementById('scene-promo-rate').value) || 0;
             if (scenePromoRateInput < 0 || scenePromoRateInput > 100) {
                 alert('场景促销折扣必须在0-100之间');
@@ -2377,65 +2441,55 @@
             }
             const scenePromoRate = scenePromoRateInput / 100;
 
-            // 逆推卖价和底价
-            let calculatedSellPrice, calculatedBasePrice;
+            let result;
             if (paymentPrice) {
-                // 计算总折扣率（携程是累加关系）
-                const totalDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + scenePromoRate + HOTEL_RED_PACKET_RATE + platformSubsidyRate;
-                calculatedSellPrice = Math.ceil(paymentPrice / (1 - totalDiscountRate)); // 向上取整，避免误差
+                let platformSubsidyRate = 0;
+                if (subsidyAmountInput > 0 && sellPriceInput > 0) {
+                    const estResult = ctripReverseCalc(paymentPrice, scenePromoRate, 0);
+                    platformSubsidyRate = subsidyAmountInput / estResult.sellPrice;
+                }
+                result = ctripReverseCalc(paymentPrice, scenePromoRate, platformSubsidyRate);
             } else {
-                calculatedSellPrice = Math.ceil(sellPrice); // 向上取整，避免误差
+                result = ctripForwardCalc(sellPriceInput, scenePromoRate, 0);
             }
+
             const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
-            calculatedBasePrice = Math.ceil(calculatedSellPrice * (1 - commissionRate)) + 1; // 向上取整，避免误差，增加1元修正误差
+            const calculatedBasePrice = Math.ceil(result.sellPrice * (1 - commissionRate));
 
-            // 计算各个折扣金额
-            const memberDiscountAmount = Math.round(calculatedSellPrice * MEMBER_DISCOUNT_RATE);
-            const dailySpecialAmount = Math.round(calculatedSellPrice * DAILY_SPECIAL_RATE);
-            const scenePromoAmount = Math.round(calculatedSellPrice * scenePromoRate);
-            const redPacketAmount = Math.ceil(calculatedSellPrice * HOTEL_RED_PACKET_RATE); // 红包金额向上取整
-            const platformSubsidyAmount = Math.round(calculatedSellPrice * platformSubsidyRate);
-
-            // 计算客付价（验证）
-            const calculatedPaymentPrice = Math.round(calculatedSellPrice - memberDiscountAmount - dailySpecialAmount - scenePromoAmount - redPacketAmount - platformSubsidyAmount);
-
-            // 计算客付价
-            const customerPaymentPrice = Math.round(paymentPrice || calculatedPaymentPrice);
-
-            // 显示结果
             const resultDiv = document.getElementById('reverse-result');
+            const discountLabel = scenePromoRate > 0 ? `${(100 - scenePromoRateInput).toFixed(0)}折` : '无';
             resultDiv.innerHTML = `
                 <div class="result-item">
                     <span class="result-label">客付价（支付价）：</span>
-                    <span class="result-value">¥${customerPaymentPrice}</span>
+                    <span class="result-value">¥${result.payPrice}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">卖价：</span>
-                    <span class="result-value">¥${Math.round(calculatedSellPrice)}</span>
+                    <span class="result-value">¥${result.sellPrice}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">底价：</span>
-                    <span class="result-value">¥${Math.round(calculatedBasePrice)}</span>
+                    <span class="result-value">¥${calculatedBasePrice}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">会员折扣（85折）：</span>
-                    <span class="result-value">¥${memberDiscountAmount}</span>
+                    <span class="result-value">¥${result.memberDiscount}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">天天特价（9折）：</span>
-                    <span class="result-value">¥${dailySpecialAmount}</span>
+                    <span class="result-value">¥${result.dailySpecial}</span>
                 </div>
                 <div class="result-item">
-                    <span class="result-label">场景促销（${100 - Math.round(scenePromoRateInput)}折）：</span>
-                    <span class="result-value">¥${scenePromoAmount}</span>
+                    <span class="result-label">场景促销（${discountLabel}）：</span>
+                    <span class="result-value">¥${result.scenePromo}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">酒店红包（9折）：</span>
-                    <span class="result-value">¥${redPacketAmount}</span>
+                    <span class="result-value">¥${result.redPacket}</span>
                 </div>
                 <div class="result-item">
                     <span class="result-label">平台补贴：</span>
-                    <span class="result-value">¥${platformSubsidyAmount} (${(platformSubsidyRate * 100).toFixed(2)}%)</span>
+                    <span class="result-value">¥${result.platformSubsidy}</span>
                 </div>
             `;
         }
@@ -2448,12 +2502,6 @@
                 return;
             }
 
-            // 从逆推计算器获取平台补贴率
-            const sellPriceInput = parseFloat(document.getElementById('sell-price').value) || 0;
-            const subsidyAmountInput = parseFloat(document.getElementById('platform-subsidy-amount').value) || 0;
-            const platformSubsidyRate = calculatePlatformSubsidyRate(sellPriceInput, subsidyAmountInput);
-
-            // 获取场景促销折扣并验证
             const scenePromoRateInput = parseFloat(document.getElementById('scene-promo-rate').value) || 0;
             if (scenePromoRateInput < 0 || scenePromoRateInput > 100) {
                 alert('场景促销折扣必须在0-100之间');
@@ -2461,27 +2509,18 @@
             }
             const scenePromoRate = scenePromoRateInput / 100;
 
-            // 计算总折扣率（携程是累加关系）
-            const totalDiscountRate = MEMBER_DISCOUNT_RATE + DAILY_SPECIAL_RATE + scenePromoRate + HOTEL_RED_PACKET_RATE + platformSubsidyRate;
+            const result = ctripReverseCalc(paymentPrice, scenePromoRate, 0);
 
-            // 计算卖价和底价
-            const sellPrice = paymentPrice / (1 - totalDiscountRate);
             const commissionRate = parseFloat(document.getElementById('commission-rate').value) / 100 || COMMISSION_RATE;
-            const basePrice = sellPrice * (1 - commissionRate);
-            const platformSubsidy = sellPrice * platformSubsidyRate;
+            const basePrice = Math.ceil(result.sellPrice * (1 - commissionRate));
 
-            // 四舍五入取整数，并在底价基础上增加1元修正误差
-            const roundedSellPrice = Math.round(sellPrice) + 2; // 增加2元修正误差，美团酒店临时用
-            const roundedBasePrice = Math.round(basePrice) + 1; // 增加1元修正误差
-            const roundedPlatformSubsidy = Math.round(platformSubsidy);
-
-            // 更新显示
             const row = document.querySelectorAll('#room-type-table tbody tr')[index];
-            row.querySelector('.sell-price-display').textContent = `¥${roundedSellPrice}`;
-            row.querySelector('.base-price-display').textContent = `¥${roundedBasePrice}`;
-            row.querySelector('.platform-subsidy-display').textContent = `¥${roundedPlatformSubsidy}`;
+            const douyinPrice = paymentPrice + 20;
+            row.querySelector('.douyin-price-display').textContent = `¥${douyinPrice}`;
+            row.querySelector('.sell-price-display').textContent = `¥${result.sellPrice}`;
+            row.querySelector('.base-price-display').textContent = `¥${basePrice}`;
+            row.querySelector('.platform-subsidy-display').textContent = `¥${result.platformSubsidy}`;
 
-            // 更新房型概览表格
             updateCtripOverview();
         }
 
@@ -2522,6 +2561,7 @@
             newRow.innerHTML = `
                 <td>新房型${rowCount + 1}</td>
                 <td><input type="number" class="room-price" data-index="${rowCount}" placeholder="请输入客付价"></td>
+                <td class="douyin-price-display"></td>
                 <td class="sell-price-display"></td>
                 <td class="base-price-display"></td>
                 <td class="platform-subsidy-display"></td>
@@ -2539,6 +2579,24 @@
 
             // 更新索引
             updateRowIndices();
+
+            // 为新添加的输入框绑定事件
+            const newInput = newRow.querySelector('.room-price');
+            if (newInput) {
+                const newIndex = rowCount;
+                newInput.addEventListener('input', function () {
+                    syncPriceBetweenPlatforms('ctrip', newIndex, this.value);
+                    const douyinDisplay = newRow.querySelector('.douyin-price-display');
+                    if (this.value) {
+                        const paymentPrice = parseFloat(this.value) || 0;
+                        douyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                    } else {
+                        douyinDisplay.textContent = '';
+                    }
+                    updateCtripOverview();
+                });
+                handleEnterKeyForRoomPriceInputs([newInput]);
+            }
         }
 
         // 删除房型（携程）
@@ -2929,6 +2987,8 @@
 
             // 更新显示
             const row = document.querySelectorAll('#room-type-table-meituan tbody tr')[index];
+            const douyinPrice = paymentPrice + 20;
+            row.querySelector('.douyin-price-display').textContent = `¥${douyinPrice}`;
             row.querySelector('.sell-price-display-meituan').textContent = `¥${Math.round(sellPrice)}`;
             row.querySelector('.base-price-display-meituan').textContent = `¥${basePrice}`;
             row.querySelector('.platform-subsidy-display-meituan').textContent = `¥${platformSubsidyAmount.toFixed(2)}`;
@@ -2969,6 +3029,7 @@
             newRow.innerHTML = `
                 <td>新房型${rowCount + 1}</td>
                 <td><input type="number" class="room-price-meituan" data-index="${rowCount}" placeholder="请输入客付价"></td>
+                <td class="douyin-price-display"></td>
                 <td class="sell-price-display-meituan"></td>
                 <td class="base-price-display-meituan"></td>
                 <td class="platform-subsidy-display-meituan"></td>
@@ -2986,6 +3047,24 @@
 
             // 更新索引
             updateRowIndicesMeituan();
+
+            // 为新添加的输入框绑定事件
+            const newInput = newRow.querySelector('.room-price-meituan');
+            if (newInput) {
+                const newIndex = rowCount;
+                newInput.addEventListener('input', function () {
+                    syncPriceBetweenPlatforms('meituan', newIndex, this.value);
+                    const douyinDisplay = newRow.querySelector('.douyin-price-display');
+                    if (this.value) {
+                        const paymentPrice = parseFloat(this.value) || 0;
+                        douyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                    } else {
+                        douyinDisplay.textContent = '';
+                    }
+                    updateMeituanOverview();
+                });
+                handleEnterKeyForRoomPriceInputs([newInput]);
+            }
         }
 
         // 删除房型（美团）
@@ -3200,10 +3279,26 @@
             document.getElementById('base-price').value = '';
             document.getElementById('room-price-diff').value = '';
 
-            // 清除携程房型输入框
-            const ctripInputs = document.querySelectorAll('.room-price');
+            // 清除携程房型输入框和显示
+            const ctripInputs = document.querySelectorAll('#room-type-table .room-price');
+            const ctripDouyinDisplays = document.querySelectorAll('#room-type-table .douyin-price-display');
+            const ctripSellDisplays = document.querySelectorAll('#room-type-table .sell-price-display');
+            const ctripBaseDisplays = document.querySelectorAll('#room-type-table .base-price-display');
+            const ctripSubsidyDisplays = document.querySelectorAll('#room-type-table .platform-subsidy-display');
             ctripInputs.forEach(input => {
                 input.value = '';
+            });
+            ctripDouyinDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            ctripSellDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            ctripBaseDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            ctripSubsidyDisplays.forEach(display => {
+                display.textContent = '';
             });
 
             // 清除美团默认值
@@ -3221,11 +3316,31 @@
             couponThresholds.forEach(input => input.value = '');
             couponDiscounts.forEach(input => input.value = '');
 
-            // 清除美团房型输入框
-            const meituanInputs = document.querySelectorAll('.room-price-meituan');
+            // 清除美团房型输入框和显示
+            const meituanInputs = document.querySelectorAll('#room-type-table-meituan .room-price-meituan');
+            const meituanDouyinDisplays = document.querySelectorAll('#room-type-table-meituan .douyin-price-display');
+            const meituanSellDisplays = document.querySelectorAll('#room-type-table-meituan .sell-price-display-meituan');
+            const meituanBaseDisplays = document.querySelectorAll('#room-type-table-meituan .base-price-display-meituan');
+            const meituanSubsidyDisplays = document.querySelectorAll('#room-type-table-meituan .platform-subsidy-display-meituan');
             meituanInputs.forEach(input => {
                 input.value = '';
             });
+            meituanDouyinDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            meituanSellDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            meituanBaseDisplays.forEach(display => {
+                display.textContent = '';
+            });
+            meituanSubsidyDisplays.forEach(display => {
+                display.textContent = '';
+            });
+
+            // 清除概览表格
+            updateCtripOverview();
+            updateMeituanOverview();
         }
 
         // 修复美团批量改价按钮点击事件
@@ -3272,11 +3387,37 @@
                     if (meituanInput && meituanInput.value !== value) {
                         meituanInput.value = value;
                     }
+                    // 更新美团抖音价格显示
+                    const meituanRow = document.querySelectorAll('#room-type-table-meituan tbody tr')[index];
+                    if (meituanRow) {
+                        const meituanDouyinDisplay = meituanRow.querySelector('.douyin-price-display');
+                        if (meituanDouyinDisplay) {
+                            if (value) {
+                                const paymentPrice = parseFloat(value) || 0;
+                                meituanDouyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                            } else {
+                                meituanDouyinDisplay.textContent = '';
+                            }
+                        }
+                    }
                 } else if (sourcePlatform === 'meituan') {
                     // 从美团同步到携程
                     const ctripInput = document.querySelectorAll('#room-type-table .room-price')[index];
                     if (ctripInput && ctripInput.value !== value) {
                         ctripInput.value = value;
+                    }
+                    // 更新携程抖音价格显示
+                    const ctripRow = document.querySelectorAll('#room-type-table tbody tr')[index];
+                    if (ctripRow) {
+                        const ctripDouyinDisplay = ctripRow.querySelector('.douyin-price-display');
+                        if (ctripDouyinDisplay) {
+                            if (value) {
+                                const paymentPrice = parseFloat(value) || 0;
+                                ctripDouyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                            } else {
+                                ctripDouyinDisplay.textContent = '';
+                            }
+                        }
                     }
                 }
             }, 300);
@@ -3312,6 +3453,15 @@
                 // 添加输入事件监听器，实现数据同步
                 input.addEventListener('input', function () {
                     syncPriceBetweenPlatforms('ctrip', index, this.value);
+                    // 实时更新主表格抖音价格
+                    const row = document.querySelectorAll('#room-type-table tbody tr')[index];
+                    const douyinDisplay = row.querySelector('.douyin-price-display');
+                    if (this.value) {
+                        const paymentPrice = parseFloat(this.value) || 0;
+                        douyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                    } else {
+                        douyinDisplay.textContent = '';
+                    }
                     // 同时更新房型概览表格
                     updateCtripOverview();
                 });
@@ -3327,6 +3477,15 @@
                 // 添加输入事件监听器，实现数据同步
                 input.addEventListener('input', function () {
                     syncPriceBetweenPlatforms('meituan', index, this.value);
+                    // 实时更新主表格抖音价格
+                    const row = document.querySelectorAll('#room-type-table-meituan tbody tr')[index];
+                    const douyinDisplay = row.querySelector('.douyin-price-display');
+                    if (this.value) {
+                        const paymentPrice = parseFloat(this.value) || 0;
+                        douyinDisplay.textContent = `¥${paymentPrice + 20}`;
+                    } else {
+                        douyinDisplay.textContent = '';
+                    }
                     // 同时更新房型概览表格
                     updateMeituanOverview();
                 });
